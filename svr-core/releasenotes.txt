@@ -40,6 +40,7 @@
 		36. (medium) test library: new advanced test properties
 		37. (major) all file models updated to support the new "scope" attribute in test parameters
 		38. (major) test library: new feature to save in the cache all parameters with the scope equals to cache
+		39. (medium) build: new curl package embedded by default
 	Issues Fixed
 		1. (minor) fix typo error in logs messages
 		2. (medium) fix regression, unable to generate test design with test global only

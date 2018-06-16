@@ -15,6 +15,7 @@
             <li>graphical abstract engine</li>
             <li>documentations</li>
             <li>ssh console adapter</li>
+            <li>ssh plugin recorder for client</li>
         </ul>
     </li>
     <li>Jean-Luc Pascal - support excel writting mode in library</li>

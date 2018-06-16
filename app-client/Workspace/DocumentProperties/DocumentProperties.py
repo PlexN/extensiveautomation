@@ -54,6 +54,7 @@ try:
     import Steps
     import Adapters
     import Libraries
+    import CacheViewer
 except ImportError as e: # support python3
     from . import Descriptions
     from . import Parameters
@@ -62,12 +63,15 @@ except ImportError as e: # support python3
     from . import Steps
     from . import Adapters
     from . import Libraries
+    from . import CacheViewer
 
 import Workspace.TestData as TestData
 import Workspace.TestConfig as TestConfig
 
 import Workspace.TestUnit as TestUnit
 import Workspace.TestSuite as TestSuite
+import Workspace.TestAbstract as TestAbstract
+import Workspace.TestPlan as TestPlan
 
 import Workspace.FileModels.TestConfig as FileModelTestConfig
 
@@ -140,14 +144,23 @@ class WDocumentProperties(QWidget, Logger.ClassLogger):
         |                                       |
         | ______________________________________|
         """
+        self.cacheViewer = CacheViewer.CacheViewerQWidget(self)
+        
         self.steps = Steps.StepsQWidget(self)
         self.descrs = Descriptions.DescriptionsQWidget(self)
-        self.parameters = Parameters.ParametersQWidget(self)
-        self.parametersOutput = Parameters.ParametersQWidget(self, forParamsOutput=True)
+        self.parameters = Parameters.ParametersQWidget(self, 
+                                                       cacheViewer=self.cacheViewer)
+        self.parametersOutput = Parameters.ParametersQWidget(self, 
+                                                             forParamsOutput=True,
+                                                             cacheViewer=self.cacheViewer)
         self.probes = Probes.ProbesQWidget(self)
         self.agents = Agents.AgentsQWidget(self)
-        self.adapters = Adapters.AdaptersQWidget(self, testParams=self, testDescrs=self.descrs)
-        self.libraries = Libraries.LibrariesQWidget(self, testParams=self, testDescrs=self.descrs)
+        self.adapters = Adapters.AdaptersQWidget(self, 
+                                                 testParams=self, 
+                                                 testDescrs=self.descrs)
+        self.libraries = Libraries.LibrariesQWidget(self, 
+                                                    testParams=self, 
+                                                    testDescrs=self.descrs)
         
         self.parametersTab = QTabWidget()
         self.parametersTab.setTabPosition(QTabWidget.North)
@@ -196,6 +209,7 @@ class WDocumentProperties(QWidget, Logger.ClassLogger):
         layout.addWidget( self.labelHelp )
 
         layout.addWidget(self.mainTab)
+        layout.addWidget(self.cacheViewer)
         layout.setContentsMargins(0,0,0,0)
 
         self.setLayout(layout)
@@ -294,6 +308,15 @@ class WDocumentProperties(QWidget, Logger.ClassLogger):
         Save the address to the document
         """
         self.wdoc = wdoc
+        
+        # prepare the preview of the cache
+        self.cacheViewer.clear()
+        self.cacheViewer.setEnabled(False)
+        
+        if isinstance(wdoc, TestUnit.WTestUnit) or isinstance(wdoc, TestSuite.WTestSuite) \
+                or isinstance(wdoc, TestAbstract.WTestAbstract) or isinstance(wdoc, TestPlan.WTestPlan):
+            self.cacheViewer.setEnabled(True)
+            self.cacheViewer.loadItems(wdoc = wdoc)
         
     def enableMarkUnused(self):
         """
@@ -537,6 +560,7 @@ class WDocumentProperties(QWidget, Logger.ClassLogger):
                                              customParam=None, 
                                              actionId=UCI.ACTION_IMPORT_OUTPUTS, 
                                              destinationId=UCI.FOR_DEST_ALL)
+    
     def loadFromLocal(self, inputs=True):
         """
         Load test config from local repository
@@ -630,6 +654,17 @@ class WDocumentProperties(QWidget, Logger.ClassLogger):
                 self.currentDoc.updateStatsTestPlan()
             self.currentDoc.setModify()
 
+        # refresh cache preview for scripting test?
+        if self.currentDoc is not None: 
+        
+            if not isinstance(self.currentDoc, TestPlan.WTestPlan):
+                self.cacheViewer.clear()
+                self.cacheViewer.loadItems(wdoc = self.currentDoc)
+            else:
+                testItem = self.currentDoc.tp.currentItem()
+                testId = testItem.text(2)
+                self.cacheViewer.updateCache(testId = testId)
+                
     def clear (self):
         """
         Clear contents
@@ -646,6 +681,8 @@ class WDocumentProperties(QWidget, Logger.ClassLogger):
         self.steps.clear()
         self.adapters.clear()
         self.libraries.clear()
+        
+        self.cacheViewer.clear()
 
     def addDescriptions (self, wdoc):
         """
@@ -873,6 +910,11 @@ class WDocumentProperties(QWidget, Logger.ClassLogger):
             else:
                 self.error('unknown file type')
 
+    def updateCache(self, properties, isRoot, testId):
+        """
+        """
+        self.cacheViewer.updateCache(testId = testId)
+        
 WDP = None # Singleton
 def instance ():
     """

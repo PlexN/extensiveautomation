@@ -1809,7 +1809,7 @@ class WTestPlan(Document.WDocument):
         
         # update the view
         self.setModify()
-        self.viewer().PropertiesChanged.emit( properties, False )
+        self.viewer().PropertiesChanged.emit( properties, False, "0" )
 
     def clearTestProperties(self):
         """
@@ -1819,11 +1819,12 @@ class WTestPlan(Document.WDocument):
             return
 
         # update the file model
-        properties = self.dataModel.cleartTestParameters(itemId=str(self.itemCurrent.text(COL_ID)))
+        item_id = str(self.itemCurrent.text(COL_ID))
+        properties = self.dataModel.cleartTestParameters(itemId=item_id)
         
         # update the view
         self.setModify()
-        self.viewer().PropertiesChanged.emit( properties, False )
+        self.viewer().PropertiesChanged.emit( properties, False, item_id )
 
     def reloadTestProperties(self, mergeProperties=False):
         """
@@ -1864,11 +1865,12 @@ class WTestPlan(Document.WDocument):
                                 return
                             properties =  copy.deepcopy(doc.properties)
 
-                            self.dataModel.updateTestFileProperties(itemId=str(self.itemCurrent.text(COL_ID)), 
+                            item_id = str(self.itemCurrent.text(COL_ID))
+                            self.dataModel.updateTestFileProperties(itemId=item_id, 
                                                                     properties=properties['properties'])
                             self.setModify()
 
-                            self.viewer().PropertiesChanged.emit( properties['properties'], False )
+                            self.viewer().PropertiesChanged.emit( properties['properties'], False, item_id )
                 
                 # load from remote
                 elif str(self.itemCurrent.text(COL_REPO)) == FROM_REMOTE_REPO:
@@ -2471,7 +2473,7 @@ class WTestPlan(Document.WDocument):
             properties = self.dataModel.getProperties(id=tsId)
             root = False
 
-        self.viewer().PropertiesChanged.emit(properties, root )
+        self.viewer().PropertiesChanged.emit(properties, root, tsId )
 
     def onPopupMenu(self, pos):
         """
@@ -3383,7 +3385,7 @@ class WTestPlan(Document.WDocument):
             self.dataModel.updateTestFileProperties(itemId=str(testId), properties=properties['properties'])
         self.setModify()
 
-        self.viewer().PropertiesChanged.emit( properties['properties'], False )
+        self.viewer().PropertiesChanged.emit( properties['properties'], False , str(testId) )
 
     def insertRemoteSubItem(self, pathFile, nameFile, extFile, contentFile, project, 
                                   below=False, propertiesTest=None, absPath=None,

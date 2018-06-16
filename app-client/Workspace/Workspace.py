@@ -384,15 +384,17 @@ class WWorkspace(QWidget):
                 WDocumentProperties.instance().disableMarkUnused()
                 
         # disable/enable status bar
-        if isinstance(wdocument, TestConfig.WTestConfig) or isinstance(wdocument, TestPlan.WTestPlan) \
-                        or isinstance(wdocument, TestPng.WTestPng) or isinstance(wdocument, TestAbstract.WTestAbstract) \
-                           or isinstance(wdocument, WDocumentViewer.WelcomePage) :
+        if isinstance(wdocument, TestConfig.WTestConfig) \
+                or isinstance(wdocument, TestPlan.WTestPlan) \
+                or isinstance(wdocument, TestPng.WTestPng) \
+                or  isinstance(wdocument, TestAbstract.WTestAbstract) \
+                or isinstance(wdocument, WDocumentViewer.WelcomePage) :
             self.hideStatusBar()
         else:
             self.showStatusBar()
             self.wCursorPosition.setNumberLines(nb=wdocument.editor().lines())
 
-    def propertiesChanged (self, properties, isRoot):
+    def propertiesChanged (self, properties, isRoot, testId):
         """
         Called when document propertis changed
 
@@ -416,6 +418,9 @@ class WWorkspace(QWidget):
             WDocumentProperties.instance().probes.clear()
             WDocumentProperties.instance().probes.setEnabled(False)
 
+        # new in v19
+        WDocumentProperties.instance().updateCache(properties, isRoot, testId )
+        
     def documentOpened (self, wdocument):
         """
         Called when a document is opened

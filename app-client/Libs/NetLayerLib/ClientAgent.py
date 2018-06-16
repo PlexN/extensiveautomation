@@ -161,7 +161,7 @@ class ClientAgent(TcpClient.TcpClientThread, TransactionManager.TransactionManag
         TcpClient.TcpClientThread.start(self)
         res =  self.getLocalAddress()
         if res[0] == '':
-            self.__localAddress = ('localhost', res[1])
+            self.__localAddress = ('127.0.0.1', res[1])
         else:
             self.__localAddress = res
         if self.__startAuto:

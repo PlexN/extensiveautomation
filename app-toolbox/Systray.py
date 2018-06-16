@@ -2597,8 +2597,11 @@ class Window(QDialog):
         thumbnailRaw =  thumbnailIo.read()
         
         # finalize generation
-        tool.plugin().onFinalizeScreenshot(request, action, actionId, adapterId, testcaseName, 
-                                           replayId, screenRaw, thumbnailRaw)
+        if tool.plugin() is not None:
+            tool.plugin().onFinalizeScreenshot(request, action, 
+                                               actionId, adapterId, 
+                                               testcaseName, replayId, 
+                                               screenRaw, thumbnailRaw)
 
     def onQuit(self):
         """

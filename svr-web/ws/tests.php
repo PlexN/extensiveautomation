@@ -75,7 +75,7 @@
 				}
 				$filename = substr($item['name'], 0, strlen($item['name']) - strlen(".".$extension) );
 				$full_path =  $parent."/".$item['name'] ;
-				$pathfile =  substr($full_path, 0, strlen($full_path) - strlen(".".$extension) );
+				$pathfile =  substr($full_path, 0, strlen($full_path) - strlen($filename.".".$extension) );
 
 				if ( endswith($item['name'], TAX) or endswith($item['name'], TSX) or endswith($item['name'], TGX) or endswith($item['name'], TPX) or endswith($item['name'], TUX) ) {
 					$ret .= '<a href="javascript:run_test('.$CORE->profile['id'].', '.$projectid.', \''.$extension.'\', \''.$filename.'\', \''.$pathfile.'\')">Run</a>';
@@ -153,21 +153,21 @@
 
 		// security check todo
 		// checking if this loginid is attached to the projectid
-		$sql_req = 'SELECT * FROM `'.$__LWF_DB_PREFIX.'-relations-projects` WHERE  user_id=\''.mysql_real_escape_string($loginid).'\';';
-		$rslt = $db->query( $sql_req );
-		if ( !$rslt ) 
-		{
-			$rsp["code"] = 603;
-			$rsp["msg"] = 'User not attached the project!';
-			return $rsp;
-		} else {
-			if ( $db->num_rows($rslt) == 0 )
-			{
-				$rsp["code"] = 603;
-				$rsp["msg"] = 'User not attached the project!';
-				return $rsp;
-			} 
-		}
+		// $sql_req = 'SELECT * FROM `'.$__LWF_DB_PREFIX.'-relations-projects` WHERE  user_id=\''.mysql_real_escape_string($loginid).'\';';
+		// $rslt = $db->query( $sql_req );
+		// if ( !$rslt ) 
+		// {
+			// $rsp["code"] = 603;
+			// $rsp["msg"] = 'User not attached the project!';
+			// return $rsp;
+		// } else {
+			// if ( $db->num_rows($rslt) == 0 )
+			// {
+				// $rsp["code"] = 603;
+				// $rsp["msg"] = 'User not attached the project!';
+				// return $rsp;
+			// } 
+		// }
 
 
 		// continue, then execute the test
@@ -182,7 +182,7 @@
 			$rsp["msg"] = "The test ".$filename." is running in background";
 		} else {
 			$rsp["code"] = 500;
-			$rsp["msg"] = 'Unable torun the test: '.$details;
+			$rsp["msg"] = 'ERROR: '.$details;
         }
 		return $rsp;	
 

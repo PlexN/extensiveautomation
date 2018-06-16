@@ -265,7 +265,7 @@ class CustomEditor(QsciScintilla):
         
         self.jsonLexer = jsonLexer
         self.codeFolding = codeFolding
-        
+
         self.createConnections()
         self.createWidget()
 
@@ -283,7 +283,7 @@ class CustomEditor(QsciScintilla):
         create qt connections
         """
         self.linesChanged.connect( self.onLinesChanged )
-        
+                                                
     def onLinesChanged(self):
         """
         Update the line counter margin's width.
@@ -293,6 +293,48 @@ class CustomEditor(QsciScintilla):
             self.setMarginWidth( 1, '0'*int(width) )
         else:
             self.setMarginWidth( 1, QString( '0'*int(width) ) )
+   
+    def foldHeader(self, line):
+        """
+        Is it a fold header line?
+
+        @param line: 
+        @type line:
+        """
+        lvl = self.SendScintilla(QsciScintilla.SCI_GETFOLDLEVEL, line)
+        return lvl & QsciScintilla.SC_FOLDLEVELHEADERFLAG
+
+    def foldExpanded(self, line):
+        """
+        Is fold expanded?
+
+        @param line: 
+        @type line:
+        """
+        return self.SendScintilla(QsciScintilla.SCI_GETFOLDEXPANDED, line)
+
+    def getFoldedLines(self):
+        """
+        Return the list of folded line numbers
+        """
+        return [line for line in xrange(self.lines()) \
+        if self.foldHeader(line) and not self.foldExpanded(line) ]
+
+    def unfoldAll(self):
+        """
+        Unfold all folded lines
+        """
+        for line in self.getFoldedLines():
+            self.foldLine(line)
+
+    def foldAllLines(self):
+        """
+        Fold all lines
+        """
+        if sys.platform == "win32":
+            self.foldAll(children=True)
+        else:
+            self.foldAll()
             
 class RawEditor(QTextEdit):
     """

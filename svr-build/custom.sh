@@ -63,11 +63,11 @@ PRODUCT_VERSION="$(cat "$APP_SRC_PATH"/VERSION)"
 PRODUCT_SVC_NAME="$(echo $APP_NAME | sed 's/.*/\L&/')"
 
 if [ "$SILENT" == "custom" -o "$SILENT" == "install" ]; then
-	echo "======================================================"
-	echo "=     - Installation of the $APP_NAME product -      ="
-	echo "=                   Denis Machard                    ="
-	echo "=              www.extensiveautomation.org           ="
-	echo "======================================================"
+	echo "=================================================================="
+	echo "=       - Installation of the $APP_NAME product -      ="
+	echo "=                           Denis Machard                        ="
+	echo "=                      www.extensiveautomation.org               ="
+	echo "=================================================================="
 fi
 
 # bin
@@ -164,6 +164,7 @@ PYSNAPPY="python-snappy-0.5.2"
 # websocket module for apache, only for centos 5/6
 MOD_WSTUNNEL="mod_proxy_wstunnel.so"
 
+CURL="curl-7.60.0"
 
 usage(){
 	echo "Usage: $0 filename"
@@ -946,7 +947,7 @@ if [ "$INSTALL_EMBEDDED_PKGS" = "Yes" ]; then
     
     echo -ne "* Installing ntlm_auth                 \r"
     cd $APP_PATH
-    $TAR_BIN $PKG_PATH/$NTLM_AUTH.tar.gz  1>> "$LOG_FILE" 2>&1
+    $TAR_BIN xvf $PKG_PATH/$NTLM_AUTH.tar.gz  1>> "$LOG_FILE" 2>&1
 	cd $APP_PATH/$NTLM_AUTH/
 	$PYBIN setup.py install 1>> "$LOG_FILE" 2>&1
 	cd .. 1>> "$LOG_FILE" 2>&1
@@ -1113,6 +1114,15 @@ if [ "$INSTALL_EMBEDDED_PKGS" = "Yes" ]; then
     cd .. 1>> "$LOG_FILE" 2>&1
     rm -rf $APP_PATH/$PYAML/ 1>> "$LOG_FILE" 2>&1
 
+	echo -ne "* Installing curl                  \r"
+	$TAR_BIN xvf $PKG_PATH/$CURL.tar.gz  1>> "$LOG_FILE" 2>&1
+    cd $APP_PATH/$CURL/
+	./configure 1>> "$LOG_FILE" 2>&1
+	make 1>> "$LOG_FILE" 2>&1
+	make install 1>> "$LOG_FILE" 2>&1
+    cd .. 1>> "$LOG_FILE" 2>&1
+	rm -rf $APP_PATH/$CURL/ 1>> "$LOG_FILE" 2>&1
+    
     echo -ne "* Installing nodejs                \r"
     $TAR_BIN --strip-components 1 -xzvf $NODEJS* -C /usr/local 1>> "$LOG_FILE" 2>&1
     

@@ -5771,7 +5771,7 @@ class TestsSchedule(Handler):
                                             )
   
         if task.lastError is not None:
-            raise HTTP_500('Unable to run the test: %s' % task.lastError)
+            raise HTTP_500('ERROR: %s' % task.lastError)
   
         if task.isRecursive(): message = "recursive"
         if task.isRecursive() and backgroundMode: message = "recursive-background"

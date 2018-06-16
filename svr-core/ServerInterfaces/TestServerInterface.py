@@ -316,6 +316,7 @@ class TestServerInterface(Logger.ClassLogger, NetLayerLib.ServerAgent):
                         NetLayerLib.ServerAgent.failed(self, client, tid, body = rsp )
                 else:
                     self.error( 'cmd is missing')
+            
             # handle other request
             else:
                 self.trace('%s received ' % request['cmd'])

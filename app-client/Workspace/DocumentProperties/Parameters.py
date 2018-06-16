@@ -1052,7 +1052,7 @@ class ValueDelegate(QItemDelegate, Logger.ClassLogger):
     """
     Value delegate item
     """
-    def __init__ (self, parent, colVal, colDescr):
+    def __init__ (self, parent, colVal, colDescr, cacheViewer):
         """
         Contructs ValueDelegate item delegate
         
@@ -1072,6 +1072,7 @@ class ValueDelegate(QItemDelegate, Logger.ClassLogger):
         self.owner = parent
         self.colVal = colVal
         self.colDescr = colDescr
+        self.cacheViewer = cacheViewer
 
     def getValue(self, index):
         """
@@ -1147,8 +1148,14 @@ class ValueDelegate(QItemDelegate, Logger.ClassLogger):
                 editor = QLineEdit(parent)
 
             elif value['type'] == 'cache':
-                editor = QLineEdit(parent)
-
+                #editor = QLineEdit(parent)
+                editor = QComboBox(parent)
+                editor.setEditable(True)
+                params = []
+                for el in self.cacheViewer.cache(): 
+                    params.append(el['name'])
+                editor.addItems ( params  )
+                
             elif value['type'] == 'pwd':
                 editor = QLineEdit(parent)
 
@@ -2867,15 +2874,12 @@ class AtRunTimeValues(QtHelper.EnhancedQDialog, Logger.ClassLogger):
         self.createDialog()
         self.createConnections()
 
-        self.refreshParametersList()
-        
     def createDialog (self):
         """
         Create qt dialog
         """
-        self.setMinimumHeight(500)
-        self.setMinimumWidth(800)
-        
+        self.setMinimumHeight(600)
+
         mainLayout = QGridLayout()
 
         self.textEdit = QtHelper.CustomEditor(self, 
@@ -2883,32 +2887,25 @@ class AtRunTimeValues(QtHelper.EnhancedQDialog, Logger.ClassLogger):
                                               codeFolding=True)
                                               
         self.textEdit.setText(self.dataValues)
-        self.textEdit.setMinimumWidth(400)
+        self.textEdit.setMinimumWidth(800)
+        
         
         buttonLayout = QVBoxLayout()
 
         self.okButton = QPushButton( QIcon(":/ok.png"), self.tr("Ok"), self)
         self.cancelButton = QPushButton( QIcon(":/test-close-black.png"), 
                                          self.tr("Cancel"), self)
-
+        self.foldButton = QPushButton( self.tr("Fold/Unfold"), self)
         self.prettyJsonButton = QPushButton(self.tr("Pretty JSON"), self)
 
-        self.parametersList = QListWidget(self)
-        # self.parametersList.setSortingEnabled(True)
-        self.parametersList.setMaximumWidth(500)
-        
-        paramsLayout = QVBoxLayout()
-        paramsLayout.addWidget( QLabel("Additionals parameters") )
-        paramsLayout.addWidget( self.parametersList )
-           
         buttonLayout.addWidget( self.okButton )
         buttonLayout.addWidget( self.cancelButton )
+        buttonLayout.addWidget( self.foldButton )
         buttonLayout.addWidget( self.prettyJsonButton )
         buttonLayout.addStretch(1)
 
         mainLayout.addWidget(self.textEdit, 0, 0)
-        mainLayout.addLayout(paramsLayout, 0, 1)
-        mainLayout.addLayout(buttonLayout, 0, 2)
+        mainLayout.addLayout(buttonLayout, 0, 1)
         self.setLayout(mainLayout)
 
         self.setWindowFlags(self.windowFlags() | Qt.WindowMinMaxButtonsHint)
@@ -2923,45 +2920,22 @@ class AtRunTimeValues(QtHelper.EnhancedQDialog, Logger.ClassLogger):
         """
         Create qt connections
         """
-        self.okButton.clicked.connect(self.accept)
+        self.okButton.clicked.connect(self.valid)
         self.cancelButton.clicked.connect(self.reject)
         self.prettyJsonButton.clicked.connect(self.makePrettyJson)
-        self.textEdit.textChanged.connect(self.refreshParametersList)
-        
-    def refreshParametersList(self):
+        self.foldButton.clicked.connect(self.textEdit.foldAllLines)
+ 
+    def valid(self):
         """
         """
-        self.parametersList.clear()
-        
-        self.parametersList.addItems( self.__loadList(name=self.paramName, 
-                                                      value=self.textEdit.text()) )
-    
-    def __loadList(self, name, value):
-        """
-        """
-        ret = []
+        # check if the json is valid
         try:
-            if not isinstance(value, dict):
-                parsed = json.loads(value)
-            else:
-                parsed = value
-                
-            if isinstance(parsed, dict):
-                for k,v in parsed.items():
-                    val_name = "%s_%s" % (name,k.upper())
-                    ret.append( val_name  )
-                    
-                    # if isinstance(v, dict):
-                        # ret.extend( self.__loadList( name=val_name, value=v )  )
-                        
-                    # if isinstance(v, list):
-                        # for l in v:
-                            # if isinstance(l, dict):
-                                # ret.extend( self.__loadList( name=val_name, value=l )  ) 
-                                
+            parsed = json.loads(self.textEdit.text())
+            del parsed
         except Exception as e:
-            pass
-        return ret
+            QMessageBox.warning(self, self.tr("Advanced value"), self.tr("Incorrect json!") )
+        else:
+            self.accept()
         
     def makePrettyJson(self):
         """
@@ -3256,7 +3230,8 @@ class ParametersTableView(QTableView, Logger.ClassLogger):
     NameParameterUpdated = pyqtSignal(str, str) 
     DataChanged = pyqtSignal() 
     NbParameters = pyqtSignal(int)
-    def __init__(self, parent, forParamsOutput=False, forTestConfig=False):
+    def __init__(self, parent, forParamsOutput=False, 
+                 forTestConfig=False, cacheViewer=None):
         """
         Contructs ParametersTableView table view
 
@@ -3267,6 +3242,8 @@ class ParametersTableView(QTableView, Logger.ClassLogger):
 
         self.forParamsOutput = forParamsOutput
         self.forTestConfig = forTestConfig
+        self.cacheViewer = cacheViewer
+        
         self.model = None
         self.__mime__ = "application/x-%s-test-config-parameters" % Settings.instance().readValue( key='Common/acronym' ).lower()
         self.datasetView = False
@@ -3349,12 +3326,19 @@ class ParametersTableView(QTableView, Logger.ClassLogger):
         self.setShowGrid(True)
         self.setGridStyle (Qt.DotLine)
 
-        self.setItemDelegateForColumn( COL_NAME, NameDelegate(self, COL_NAME) )
+        self.setItemDelegateForColumn( COL_NAME, NameDelegate(self, 
+                                                              COL_NAME) )
         # empty value is to indicate a separator
-        self.setItemDelegateForColumn( COL_TYPE, ComboTypeDelegate(self, TYPES_PARAM, COL_TYPE) )
-        self.setItemDelegateForColumn( COL_VALUE, ValueDelegate(self, COL_VALUE, COL_DESCRIPTION) )
-        self.setItemDelegateForColumn( COL_DESCRIPTION, DescriptionsDelegate(self, COL_DESCRIPTION) )
-
+        self.setItemDelegateForColumn( COL_TYPE, ComboTypeDelegate(self, 
+                                                                   TYPES_PARAM, 
+                                                                   COL_TYPE) )
+        self.setItemDelegateForColumn( COL_VALUE, ValueDelegate(self, 
+                                                                COL_VALUE, 
+                                                                COL_DESCRIPTION,
+                                                                cacheViewer=self.cacheViewer) )
+        self.setItemDelegateForColumn( COL_DESCRIPTION, DescriptionsDelegate(self, 
+                                                                             COL_DESCRIPTION) )
+                                                                             
         self.setItemDelegateForColumn(COL_CACHE, CacheDelegate(self) )
         
         self.setSelectionMode(QAbstractItemView.ExtendedSelection)
@@ -4072,7 +4056,8 @@ class ParametersTableView(QTableView, Logger.ClassLogger):
 
         fileAny = QFile(_fileName)
         if not fileAny.open(QIODevice.ReadOnly):
-            QMessageBox.warning(self, self.tr("Open local file failed"), self.tr("unable to read content") )
+            QMessageBox.warning(self, self.tr("Open local file failed"), 
+                                self.tr("unable to read content") )
             return None
         else:
             fileData= fileAny.readAll()
@@ -4089,7 +4074,8 @@ class ParametersTableView(QTableView, Logger.ClassLogger):
         """
         Import external image from local disk
         """
-        fileName = QFileDialog.getOpenFileName(self, self.tr("Import image"), "", "Images (*.%s)" % Workspace.Repositories.LocalRepository.EXTENSION_PNG )
+        fileName = QFileDialog.getOpenFileName(self, self.tr("Import image"), 
+                                                "", "Images (*.%s)" % Workspace.Repositories.LocalRepository.EXTENSION_PNG )
         # new in v18 to support qt5
         if QtHelper.IS_QT5:
             _fileName, _type = fileName
@@ -4101,17 +4087,20 @@ class ParametersTableView(QTableView, Logger.ClassLogger):
             return None
         
         if not ( str(_fileName).endswith( Workspace.Repositories.LocalRepository.EXTENSION_PNG ) ):
-            QMessageBox.warning(self, self.tr("Open local image failed") , self.tr("Image file not supported") )
+            QMessageBox.warning(self, self.tr("Open local image failed") , 
+                                self.tr("Image file not supported") )
             return None
 
         image = QImage(_fileName)
         if image.isNull():
-            QMessageBox.warning(self, self.tr("Open local image failed") , self.tr("Image file not supported, unable to read") )
+            QMessageBox.warning(self, self.tr("Open local image failed") , 
+                                self.tr("Image file not supported, unable to read") )
             return None
 
         fileImage = QFile(_fileName)
         if not fileImage.open(QIODevice.ReadOnly):
-            QMessageBox.warning(self, self.tr("Open local image failed"), self.tr("Image file not supported, unable to read content") )
+            QMessageBox.warning(self, self.tr("Open local image failed"), 
+                                self.tr("Image file not supported, unable to read content") )
             return None
         else:
             imageData= fileImage.readAll()
@@ -4166,23 +4155,27 @@ class ParametersTableView(QTableView, Logger.ClassLogger):
                 if RCI.instance().isAuthenticated: # no then perhaps in remo repo if connected?
                     editor = self.loadFromRemote() # load remote test config file
                 else:
-                    QMessageBox.warning(self, self.tr("Import") , self.tr("Connect to the test center first!") )
+                    QMessageBox.warning(self, self.tr("Import") , 
+                                        self.tr("Connect to the test center first!") )
         
         # import from remote repo
         elif RCI.instance().isAuthenticated: # no then perhaps in remo repo if connected?
             editor = self.loadFromRemote() # load remote dataset file
 
         else:
-            QMessageBox.warning(self, self.tr("Import") , self.tr("Connect to the test center first!") )
+            QMessageBox.warning(self, self.tr("Import") , 
+                                self.tr("Connect to the test center first!") )
         return editor
 
     def loadFromLocal(self):
         """
         Load from local repository
         """
-        editor = Workspace.Repositories.LocalRepository.SaveOpenToRepoDialog( self , "", type = Workspace.Repositories.LocalRepository.MODE_OPEN,
-                                                                                typeFile=[ Workspace.Repositories.LocalRepository.EXTENSION_TDX ]) 
-        editor.hideFiles(hideTsx=True, hideTpx=True, hideTcx=True, hideTdx=False, hideTux=True, hidePng=True)
+        editor = Workspace.Repositories.LocalRepository.SaveOpenToRepoDialog( self , "", 
+                                                                              type = Workspace.Repositories.LocalRepository.MODE_OPEN,
+                                                                               typeFile=[ Workspace.Repositories.LocalRepository.EXTENSION_TDX ]) 
+        editor.hideFiles(hideTsx=True, hideTpx=True, hideTcx=True, 
+                         hideTdx=False, hideTux=True, hidePng=True)
         if editor.exec_() == QDialog.Accepted:
             return editor.getSelection(withRepoName=True)
         else:
@@ -4239,7 +4232,8 @@ class ParametersTableView(QTableView, Logger.ClassLogger):
         """
         Load image from anywhere
         """
-        fileName = QFileDialog.getOpenFileName(self, self.tr("Import image"), "", "Images (*.%s)" % Workspace.Repositories.LocalRepository.EXTENSION_PNG )
+        fileName = QFileDialog.getOpenFileName(self, self.tr("Import image"),
+                                               "", "Images (*.%s)" % Workspace.Repositories.LocalRepository.EXTENSION_PNG )
         # new in v18 to support qt5
         if QtHelper.IS_QT5:
             _fileName, _type = fileName
@@ -4272,7 +4266,8 @@ class ParametersQWidget(QWidget, Logger.ClassLogger):
     """
     Parameters widget
     """
-    def __init__(self, parent, forParamsOutput=False, forTestConfig=False):
+    def __init__(self, parent, forParamsOutput=False, 
+                 forTestConfig=False, cacheViewer=None):
         """
         Contructs Parameters Widget
 
@@ -4282,6 +4277,7 @@ class ParametersQWidget(QWidget, Logger.ClassLogger):
         QWidget.__init__(self, parent)
         self.forParamsOutput = forParamsOutput
         self.forTestConfig = forTestConfig
+        self.cacheViewer = cacheViewer
 
         self.createWidgets()
         self.createToolbar()
@@ -4324,8 +4320,10 @@ class ParametersQWidget(QWidget, Logger.ClassLogger):
         self.dockToolbarParams = QToolBar(self)
         self.dockToolbarParams.setStyleSheet("QToolBar { border: 0px; }") # remove 3D border
 
-        self.parametersTable = ParametersTableView(self, forParamsOutput=self.forParamsOutput, 
-                                                    forTestConfig=self.forTestConfig)
+        self.parametersTable = ParametersTableView(self, 
+                                                   forParamsOutput=self.forParamsOutput, 
+                                                   forTestConfig=self.forTestConfig,
+                                                   cacheViewer=self.cacheViewer)
         self.parametersTable.setColumnHidden(COL_DESCRIPTION, 
                                     QtHelper.str2bool(Settings.instance().readValue( key = 'TestProperties/parameters-hide-description' ))
                                 )

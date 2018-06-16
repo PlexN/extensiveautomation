@@ -760,7 +760,7 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
     TotalLinesChanged = pyqtSignal(int)
     CursorPositionChanged = pyqtSignal(int, int)
     FocusChanged = pyqtSignal(object)
-    PropertiesChanged = pyqtSignal(dict, bool)
+    PropertiesChanged = pyqtSignal(dict, bool, str)
     NbReplaced = pyqtSignal(int)
     # new in v16
     ShowPropertiesTab = pyqtSignal() 
