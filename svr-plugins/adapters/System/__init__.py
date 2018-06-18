@@ -28,6 +28,7 @@ try:
 	from nmap import *
 	from ncat import *
 	from openssl import *
+	from curl import *
 except ImportError: # python3 support
 	from .windows import *
 	from .linux import *
@@ -35,5 +36,6 @@ except ImportError: # python3 support
 	from .nmap import *
 	from .ncat import *
 	from .openssl import *
+	from .curl import *
 	
 __DESCRIPTION__ = "This adapter enables to execute system commands on windows or linux."

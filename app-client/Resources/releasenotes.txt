@@ -21,6 +21,7 @@
 		17. (major) new advanced parameter in test properties
 		18. (major) new column cache in test inputs/outputs properties 
 		19. (medium) test properties: no more display value in the table for text, custom and json parameters
+		20. (minor) small graphical change in test tabulation part in test properties
 	Issues Fixed
 		1. (medium) fix regression: unable to zoom in/out in test editor
 		2. (medium) automation assistant: unable to generate testsuite with sikulix/selenium in the same test issue #9

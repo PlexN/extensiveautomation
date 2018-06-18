@@ -41,6 +41,7 @@
 		37. (major) all file models updated to support the new "scope" attribute in test parameters
 		38. (major) test library: new feature to save in the cache all parameters with the scope equals to cache
 		39. (medium) build: new curl package embedded by default
+		40. (minor) nodejs v6 removed from package
 	Issues Fixed
 		1. (minor) fix typo error in logs messages
 		2. (medium) fix regression, unable to generate test design with test global only
@@ -51,3 +52,4 @@
 		7. (medium) rest api: fix update password ressource, missing sha1 procedure
 		8. (medium) web server: unable to display test report in test results part
 		9. (minor) test executor: fix issue #13 - getSize function missing on template message
+		10. (medium) test library: fix encoding in test operators

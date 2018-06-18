@@ -193,7 +193,7 @@ class WDocumentProperties(QWidget, Logger.ClassLogger):
         self.labelHelp.setFont(font)
 
         self.mainTab = QTabWidget()
-        self.mainTab.setTabPosition(QTabWidget.North)
+        self.mainTab.setTabPosition(QTabWidget.South)
         
         self.mainTab.addTab(self.parametersTab, QIcon(":/test-description.png"), "Test Design")
         self.mainTab.addTab(self.paramsTab, QIcon(":/repository.png"), "Test Data")

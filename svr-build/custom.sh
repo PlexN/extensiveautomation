@@ -154,7 +154,6 @@ JSONPATH="jsonpath-ng-1.4.3"
 WRAPT="wrapt-1.10.11"
 PYAML="pyaml-17.12.1"
 ANSIBLE="ansible-2.5.0"
-NODEJS="node-v6.11.0-linux-x64"
 URLLIB3="urllib3-1.22"
 F5_ICONTROL="f5-icontrol-rest-1.3.8"
 F5_SDK="f5-sdk-3.0.14"
@@ -1122,10 +1121,7 @@ if [ "$INSTALL_EMBEDDED_PKGS" = "Yes" ]; then
 	make install 1>> "$LOG_FILE" 2>&1
     cd .. 1>> "$LOG_FILE" 2>&1
 	rm -rf $APP_PATH/$CURL/ 1>> "$LOG_FILE" 2>&1
-    
-    echo -ne "* Installing nodejs                \r"
-    $TAR_BIN --strip-components 1 -xzvf $NODEJS* -C /usr/local 1>> "$LOG_FILE" 2>&1
-    
+
 	echo_success; echo
 fi
 
