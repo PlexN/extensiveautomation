@@ -87,10 +87,7 @@ DEFAULT_NAME = 'Noname'
 TAB_DESCRIPTION     =   0
 TAB_STEPS           =   1
 
-TAB_INPUTS          =   0
-TAB_OUTPUTS         =   1
-TAB_ADAPTERS        =   2
-TAB_LIBRARIES       =   3
+
 
 TAB_AGENTS          =   0
 TAB_PROBES          =   1
@@ -100,6 +97,10 @@ class WDocumentProperties(QWidget, Logger.ClassLogger):
     Document properties widget
     """
     RefreshLocalRepository = pyqtSignal()
+    TAB_INPUTS          =   0
+    TAB_OUTPUTS         =   1
+    TAB_ADAPTERS        =   2
+    TAB_LIBRARIES       =   3
     def __init__(self, parent=None, iRepo=None, lRepo=None, rRepo=None):
         """
         Widget document properties
@@ -114,6 +115,10 @@ class WDocumentProperties(QWidget, Logger.ClassLogger):
         """
         QWidget.__init__(self, parent)
         
+        if Settings.instance().readValue( key = 'TestProperties/outputs-enabled' ) == "False":
+            self.TAB_ADAPTERS        =   1
+            self.TAB_LIBRARIES       =   2
+            
         self.descrs = None
         self.parameters = None
         self.probes = None
@@ -150,6 +155,7 @@ class WDocumentProperties(QWidget, Logger.ClassLogger):
         self.descrs = Descriptions.DescriptionsQWidget(self)
         self.parameters = Parameters.ParametersQWidget(self, 
                                                        cacheViewer=self.cacheViewer)
+                                                       
         self.parametersOutput = Parameters.ParametersQWidget(self, 
                                                              forParamsOutput=True,
                                                              cacheViewer=self.cacheViewer)
@@ -172,7 +178,9 @@ class WDocumentProperties(QWidget, Logger.ClassLogger):
         self.paramsTab.setStyleSheet("QTabWidget { border: 0px; }") # remove 3D border
         self.paramsTab.setTabPosition(QTabWidget.North)
         self.paramsTab.addTab(self.parameters, QIcon(":/test-input.png"), "Inputs")
-        self.paramsTab.addTab(self.parametersOutput, QIcon(":/test-output.png"), "Outputs")
+        if Settings.instance().readValue( key = 'TestProperties/outputs-enabled' ) == "True":
+            self.paramsTab.addTab(self.parametersOutput, QIcon(":/test-output.png"), "Outputs")
+
         self.paramsTab.addTab(self.adapters, QIcon(":/adapters.png"), "Adapters")
         self.paramsTab.addTab(self.libraries, QIcon(":/libraries.png"), "Libraries")
 
@@ -202,7 +210,7 @@ class WDocumentProperties(QWidget, Logger.ClassLogger):
 
         if Settings.instance().readValue( key = 'TestProperties/inputs-default-tab' ) == "True":
             self.mainTab.setCurrentIndex(1)
-            self.paramsTab.setCurrentIndex(TAB_INPUTS)
+            self.paramsTab.setCurrentIndex(self.TAB_INPUTS)
 
         layout = QVBoxLayout()
         layout.addWidget( self.title )
@@ -242,10 +250,11 @@ class WDocumentProperties(QWidget, Logger.ClassLogger):
             self.parameters.table().NameParameterUpdated.connect(self.inputNameChanged)
         self.parameters.table().NbParameters.connect(self.onUpdateInputsNumber)
         
-        self.parametersOutput.table().DataChanged.connect(self.dataChanged)
-        if Settings.instance().readValue( key = 'TestProperties/parameters-rename-auto' ) == "True":
-            self.parametersOutput.table().NameParameterUpdated.connect(self.outputNameChanged)
-        self.parametersOutput.table().NbParameters.connect(self.onUpdateOutputsNumber)
+        if Settings.instance().readValue( key = 'TestProperties/outputs-enabled' ) == "True":
+            self.parametersOutput.table().DataChanged.connect(self.dataChanged)
+            if Settings.instance().readValue( key = 'TestProperties/parameters-rename-auto' ) == "True":
+                self.parametersOutput.table().NameParameterUpdated.connect(self.outputNameChanged)
+            self.parametersOutput.table().NbParameters.connect(self.onUpdateOutputsNumber)
         
         self.probes.table().DataChanged.connect(self.dataChanged)
         self.agents.table().DataChanged.connect(self.dataChanged)
@@ -279,13 +288,13 @@ class WDocumentProperties(QWidget, Logger.ClassLogger):
         """
         On update the number of inputs in the tabulation name
         """
-        self.paramsTab.setTabText(0, "Inputs (%s)" % nbParams )
+        self.paramsTab.setTabText(self.TAB_INPUTS, "Inputs (%s)" % nbParams )
 
     def onUpdateOutputsNumber(self, nbParams):
         """
         On update the number of outputs in the tabulation name
         """
-        self.paramsTab.setTabText(1, "Outputs (%s)" % nbParams )
+        self.paramsTab.setTabText(self.TAB_OUTPUTS, "Outputs (%s)" % nbParams )
         
     def initToolbarParameters(self):
         """
@@ -462,7 +471,10 @@ class WDocumentProperties(QWidget, Logger.ClassLogger):
         if dialog.exec_() == QDialog.Accepted:
             fileName = dialog.getSelection()
             path, filename = self.splitFileName(fileName=fileName)
-            doc = TestConfig.WTestConfig(self,path = path, filename=filename, extension=self.rRepo.EXTENSION_TCX, remoteFile=True)
+            doc = TestConfig.WTestConfig(self,path = path, 
+                                         filename=filename, 
+                                         extension=self.rRepo.EXTENSION_TCX, 
+                                         remoteFile=True)
             if inputs:
                 doc.dataModel.properties['properties']['parameters']['parameter'] = self.parameters.table().model.getData()
             else:
@@ -486,7 +498,10 @@ class WDocumentProperties(QWidget, Logger.ClassLogger):
         Deprecated function
         """
 
-        fileName = QFileDialog.getSaveFileName(self, "Export Test Config", "", "*.%s" % self.rRepo.EXTENSION_TCX )
+        fileName = QFileDialog.getSaveFileName(self, 
+                                               "Export Test Config", 
+                                               "", 
+                                               "*.%s" % self.rRepo.EXTENSION_TCX )
         if fileName.isEmpty():
                 return
 
@@ -662,6 +677,9 @@ class WDocumentProperties(QWidget, Logger.ClassLogger):
                 self.cacheViewer.loadItems(wdoc = self.currentDoc)
             else:
                 testItem = self.currentDoc.tp.currentItem()
+                if testItem is None:
+                    testItem = self.currentDoc.tp.topLevelItem(0)
+
                 testId = testItem.text(2)
                 self.cacheViewer.updateCache(testId = testId)
                 
@@ -803,13 +821,13 @@ class WDocumentProperties(QWidget, Logger.ClassLogger):
         Disable output parameters tabulation
         """
         self.parametersOutput.clear()
-        self.paramsTab.setTabEnabled(TAB_OUTPUTS, False)
+        self.paramsTab.setTabEnabled(self.TAB_OUTPUTS, False)
 
     def enableOutputParameters(self):
         """
         Enable output parameters tabulation
         """
-        self.paramsTab.setTabEnabled(TAB_OUTPUTS, True)
+        self.paramsTab.setTabEnabled(self.TAB_OUTPUTS, True)
 
     def disableAgents(self):
         """
@@ -855,26 +873,26 @@ class WDocumentProperties(QWidget, Logger.ClassLogger):
         Disable adapters tabulation
         """
         self.adapters.clear()
-        self.paramsTab.setTabEnabled(TAB_ADAPTERS, False)
+        self.paramsTab.setTabEnabled(self.TAB_ADAPTERS, False)
 
     def enableAdapters(self):
         """
         Enable adapters tabulation
         """
-        self.paramsTab.setTabEnabled(TAB_ADAPTERS, True)
+        self.paramsTab.setTabEnabled(self.TAB_ADAPTERS, True)
 
     def disableLibraries(self):
         """
         Disable libraries tabulation
         """
         self.libraries.clear()
-        self.paramsTab.setTabEnabled(TAB_LIBRARIES, False)
+        self.paramsTab.setTabEnabled(self.TAB_LIBRARIES, False)
 
     def enableLibraries(self):
         """
         Enable libraries tabulation
         """
-        self.paramsTab.setTabEnabled(TAB_LIBRARIES, True)
+        self.paramsTab.setTabEnabled(self.TAB_LIBRARIES, True)
 
     def inputNameChanged(self, oldName, newName):
         """

@@ -24,7 +24,7 @@
 import TestExecutorLib.TestValidatorsLib as TestValidators
 import TestExecutorLib.TestTemplatesLib as TestTemplates
 import TestExecutorLib.TestOperatorsLib as TestOperators
-import TestExecutorLib.TestAdapterLib as TestAdapter
+import TestExecutorLib.TestAdapterLib as TestAdapterLib
 import TestExecutorLib.TestLibraryLib as TestLibrary
 from TestExecutorLib.TestExecutorLib import doc_public
 
@@ -46,7 +46,7 @@ __NAME__="""LDAP"""
 AGENT_EVENT_INITIALIZED = "AGENT_INITIALIZED"
 AGENT_TYPE_EXPECTED='ldap'
 
-class Client(TestAdapter.Adapter):
+class Client(TestAdapterLib.Adapter):
 	@doc_public
 	def __init__(self, parent, ip, dn, password, port=389, sslSupport=False,
 											name=None, debug=False, shared=False, 
@@ -87,19 +87,11 @@ class Client(TestAdapter.Adapter):
 		@param agent: agent to use (default=None)
 		@type agent: string/none
 		"""
-		# check the agent
-		if agentSupport and agent is None:
-			raise TestAdapter.ValueException(TestAdapter.caller(), "Agent cannot be undefined!" )
-		if agentSupport:
-			if not isinstance(agent, dict) : 
-				raise TestAdapter.ValueException(TestAdapter.caller(), "agent argument is not a dict (%s)" % type(agent) )
-			if not len(agent['name']): 
-				raise TestAdapter.ValueException(TestAdapter.caller(), "agent name cannot be empty" )
-			if  unicode(agent['type']) != unicode(AGENT_TYPE_EXPECTED): 
-				raise TestAdapter.ValueException(TestAdapter.caller(), 'Bad agent type: %s, expected: %s' % (agent['type'], unicode(AGENT_TYPE_EXPECTED))  )
-		
-		TestAdapter.Adapter.__init__(self, name = __NAME__, parent = parent, debug=debug, realname=name,
-																							agentSupport=agentSupport, agent=agent, shared=shared)
+		TestAdapterLib.Adapter.__init__(self, name = __NAME__, parent = parent, 
+																										debug=debug, realname=name,
+																										agentSupport=agentSupport, agent=agent, shared=shared,
+																										caller=TestAdapterLib.caller(),
+																										agentType=AGENT_TYPE_EXPECTED)
 		self.parent = parent
 		self.codecX2D = Xml2Dict.Xml2Dict()
 		self.codecD2X = Dict2Xml.Dict2Xml(coding = None)
@@ -109,7 +101,7 @@ class Client(TestAdapter.Adapter):
 			self.cfg['agent-name'] = agent['name']
 		self.cfg['agent-support'] = agentSupport
 		
-		self.TIMER_ALIVE_AGT = TestAdapter.Timer(parent=self, duration=20, name="keepalive-agent", callback=self.aliveAgent,
+		self.TIMER_ALIVE_AGT = TestAdapterLib.Timer(parent=self, duration=20, name="keepalive-agent", callback=self.aliveAgent,
 																																logEvent=False, enabled=True)
 		self.__checkConfig()
 		
@@ -497,8 +489,7 @@ class Client(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage/none
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		# construct the expected template
 
@@ -523,8 +514,7 @@ class Client(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		expected = templates.ldap( ip=self.cfg['ip'], port=self.cfg['port'], more=templates.ldap_connected() )
 		evt = self.received( expected = self.encapsule(ldap_event=expected), timeout = timeout )
@@ -540,8 +530,7 @@ class Client(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		expected = templates.ldap(ip=self.cfg['ip'], port=self.cfg['port'], more=templates.ldap_disconnected() )
 		evt = self.received( expected = self.encapsule(ldap_event=expected), timeout = timeout )

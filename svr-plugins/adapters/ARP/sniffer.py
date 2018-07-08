@@ -80,28 +80,19 @@ class Sniffer(TestAdapterLib.Adapter):
 		@param shared: shared adapter (default=False)
 		@type shared:	boolean
 		"""
-		# check agent
-		if agentSupport and agent is None:
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "Agent cannot be undefined!" )	
-			
-		if agentSupport:
-			if not isinstance(agent, dict) : 
-				raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "agent argument is not a dict (%s)" % type(agent) )
-			if not len(agent['name']): 
-				raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "agent name cannot be empty" )
-			if  unicode(agent['type']) != unicode(AGENT_TYPE_EXPECTED): 
-				raise TestAdapterLib.ValueException(TestAdapterLib.caller(), 'Bad agent type: %s, expected: %s' % (agent['type'], unicode(AGENT_TYPE_EXPECTED))  )
 		# init adapter
 		TestAdapterLib.Adapter.__init__(self, name = __NAME__, parent = parent, debug=debug, shared=shared, 
-																				realname=name, agentSupport=agentSupport, agent=agent)
+																									realname=name, agentSupport=agentSupport, agent=agent,
+																									caller=TestAdapterLib.caller(),
+																									agentType=AGENT_TYPE_EXPECTED)
 		self.logEventSent = logEventSent
 		self.logEventReceived = logEventReceived
 		
 		self.ether = AdapterEthernet.Sniffer(parent=parent, debug=debug, macResolution=True, 
-																					logEventSent=False, logEventReceived=False, 
-																					protocol2sniff=AdapterEthernet.ARP, parentName=__NAME__ , 
-																					agentSupport=agentSupport, agent=agent,
-																					shared=shared, name=name)
+																												logEventSent=False, logEventReceived=False, 
+																												protocol2sniff=AdapterEthernet.ARP, parentName=__NAME__ , 
+																												agentSupport=agentSupport, agent=agent,
+																												shared=shared, name=name)
 		# wrappers
 		self.ether.onReceiving = self.onReceiving
 		self.startListening = self.ether.startListening
@@ -208,8 +199,7 @@ class Sniffer(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		return self.ether.isSniffing(timeout=timeout)
 
@@ -224,8 +214,7 @@ class Sniffer(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		return self.ether.isStopped(timeout=timeout)
 		
@@ -301,8 +290,7 @@ class Sniffer(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		expected = TestTemplatesLib.TemplateMessage()
 		
@@ -406,8 +394,7 @@ class Sniffer(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		senderMac = self.ether.getSourceMac()
 		if senderIp is None:

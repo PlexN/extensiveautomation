@@ -300,8 +300,7 @@ class Automate(TestAdapter.Adapter):
 	def getNbPlaying(self, nb=2, timeout=10):
 		"""
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		events = []
 

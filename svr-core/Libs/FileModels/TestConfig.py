@@ -43,9 +43,15 @@ import re
 
 r = re.compile( u"[^\x09\x0A\x0D\x20-\x7E\x85\xA0-\xFF\u0100-\uD7FF\uE000-\uFDCF\uFDE0-\uFFFD]")
 def removeInvalidXML(string):
-  def replacer(m):
-    return ""
-  return re.sub(r,replacer,string)
+    """
+    Remove invalid XML
+    """
+    def replacer(m):
+        """
+        return empty string
+        """
+        return ""
+    return re.sub(r,replacer,string)
   
 def bytes2str(val):
     """
@@ -87,8 +93,18 @@ class DataModel(GenericModel.GenericModel):
         # init file properties
         self.properties = { 'properties': {
                                     'parameters': {
-                                        'parameter': [ {'type': 'bool', 'name': 'DEBUG', 'description': '', 'value' : 'False', 'color': '' },
-                                                         {'type': 'float', 'name': 'TIMEOUT', 'description': '', 'value' : timeout, 'color': '' } ]
+                                        'parameter': [ {'type': 'bool', 
+                                                        'name': 'DEBUG', 
+                                                        'description': '', 
+                                                        'value' : 'False', 
+                                                        'color': '',  
+                                                        'scope': 'local' },
+                                                         {'type': 'float', 
+                                                         'name': 'TIMEOUT', 
+                                                         'description': '', 
+                                                         'value' : timeout, 
+                                                         'color': '',  
+                                                         'scope': 'local' } ]
                                             }
                                 }
                             }
@@ -160,6 +176,17 @@ class DataModel(GenericModel.GenericModel):
                     self.fixXML( data = properties['parameters'], key = 'parameter' )
                     if '@parameter' in properties['parameters']:
                         self.fixXML( data = properties['parameters'], key = '@parameter' )
+
+                    # BEGIN NEW in 19.0.0 : add missing scope parameters
+                    for p in properties['inputs-parameters']['parameter']:
+                        if "scope" not in p: 
+                            p["scope"] = "local"
+                            p["@scope"] = {}
+                    for p in properties['outputs-parameters']['parameter']:
+                        if "scope" not in p: 
+                            p["scope"] = "local"
+                            p["@scope"] = {}
+                    # END OF NEW
                 except Exception as e:
                     self.error( "TestConfig >  fix xml %s" % str(e) )
                 else:

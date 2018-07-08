@@ -24,7 +24,7 @@
 import TestExecutorLib.TestValidatorsLib as TestValidators
 import TestExecutorLib.TestTemplatesLib as TestTemplates
 import TestExecutorLib.TestOperatorsLib as TestOperators
-import TestExecutorLib.TestAdapterLib as TestAdapter
+import TestExecutorLib.TestAdapterLib as TestAdapterLib
 import TestExecutorLib.TestLibraryLib as TestLibrary
 from TestExecutorLib.TestExecutorLib import doc_public
 
@@ -39,10 +39,10 @@ except ImportError: # python3 support
 from Libs.PyXmlDict import Xml2Dict
 from Libs.PyXmlDict import Dict2Xml
 
-AdapterIP = sys.modules['SutAdapters.%s.IPLITE' % TestAdapter.getVersion()]
-AdapterTCP = sys.modules['SutAdapters.%s.TCP' % TestAdapter.getVersion()]
-AdapterSSL = sys.modules['SutAdapters.%s.SSL' % TestAdapter.getVersion()]
-AdapterSOCKS = sys.modules['SutAdapters.%s.SOCKS' % TestAdapter.getVersion()]
+AdapterIP = sys.modules['SutAdapters.%s.IPLITE' % TestAdapterLib.getVersion()]
+AdapterTCP = sys.modules['SutAdapters.%s.TCP' % TestAdapterLib.getVersion()]
+AdapterSSL = sys.modules['SutAdapters.%s.SSL' % TestAdapterLib.getVersion()]
+AdapterSOCKS = sys.modules['SutAdapters.%s.SOCKS' % TestAdapterLib.getVersion()]
 
 import copy
 
@@ -210,7 +210,7 @@ class ClientObj(object):
 		# reset the buffer
 		self.buf = ''	
 		
-class Server(TestAdapter.Adapter):
+class Server(TestAdapterLib.Adapter):
 	@doc_public
 	def __init__(self, parent, name=None, debug=False, shared=False, agentSupport=False, agent=None,
 														 bindIp = '', bindPort=0,  sslSupport=False,  strictMode=False, octetStreamSupport=True, 
@@ -256,19 +256,12 @@ class Server(TestAdapter.Adapter):
 		@param keyFile:  key file (default=/tmp/key.file)
 		@type keyFile:   string
 		"""
-		# check the agent
-		if agentSupport and agent is None:
-			raise TestAdapter.ValueException(TestAdapter.caller(), "Agent cannot be undefined!" )
-		if agentSupport:
-			if not isinstance(agent, dict) : 
-				raise TestAdapter.ValueException(TestAdapter.caller(), "agent argument is not a dict (%s)" % type(agent) )
-			if not len(agent['name']): 
-				raise TestAdapter.ValueException(TestAdapter.caller(), "agent name cannot be empty" )
-			if  unicode(agent['type']) != unicode(AGENT_TYPE_EXPECTED): 
-				raise TestAdapter.ValueException(TestAdapter.caller(), 'Bad agent type: %s, expected: %s' % (agent['type'], unicode(AGENT_TYPE_EXPECTED))  )
-		
-		TestAdapter.Adapter.__init__(self, name = __NAME__, parent = parent, debug=debug, realname=name,
-																							agentSupport=agentSupport, agent=agent, shared=shared)
+		TestAdapterLib.Adapter.__init__(self, name = __NAME__, parent = parent, 
+																										debug=debug, realname=name,
+																										agentSupport=agentSupport, 
+																										agent=agent, shared=shared,
+																										caller=TestAdapterLib.caller(),
+																										agentType=AGENT_TYPE_EXPECTED)
 		self.parent = parent
 		self.codecX2D = Xml2Dict.Xml2Dict()
 		self.codecD2X = Dict2Xml.Dict2Xml(coding = None)
@@ -564,8 +557,7 @@ class Server(TestAdapter.Adapter):
 		@return: http response or none otherwise
 		@rtype:	templatemessage/templatelayer/none	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		if expected is None:
 			raise Exception( 'has received response: expected template cannot be empty' )
@@ -616,8 +608,7 @@ class Server(TestAdapter.Adapter):
 		@return: http response
 		@rtype:	   template	  
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ):
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 
 		tpl = TestTemplates.TemplateMessage()
 		   

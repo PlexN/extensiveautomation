@@ -189,18 +189,6 @@ class Client(TestAdapterLib.Adapter):
 		@param verbose: False to disable verbose mode (default=True)
 		@type verbose: boolean
 		"""
-		# check agent
-		if agentSupport and agent is None:
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "Agent cannot be undefined!" )	
-			
-		if agentSupport:
-			if not isinstance(agent, dict) : 
-				raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "agent argument is not a dict (%s)" % type(agent) )
-			if not len(agent['name']): 
-				raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "agent name cannot be empty" )
-			if  unicode(agent['type']) != unicode(AGENT_TYPE_EXPECTED): 
-				raise TestAdapterLib.ValueException(TestAdapterLib.caller(), 'Bad agent type: %s, expected: %s' % (agent['type'], unicode(AGENT_TYPE_EXPECTED))  )
-		
 		if not isinstance(bindPort, int):
 			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "bindPort argument is not a integer (%s)" % type(bindPort) )
 		if not isinstance(destinationPort, int):
@@ -209,9 +197,13 @@ class Client(TestAdapterLib.Adapter):
 			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "proxyPort argument is not a integer (%s)" % type(proxyPort) )
 
 		# init adapter
-		TestAdapterLib.Adapter.__init__(self, name = __NAME__, parent = parent, debug=debug, shared=shared, 
-																										realname=name, agentSupport=agentSupport, agent=agent, showEvts=verbose,
-																										showSentEvts=verbose, showRecvEvts=verbose)
+		TestAdapterLib.Adapter.__init__(self, name = __NAME__, parent = parent, 
+																										debug=debug, shared=shared, 
+																										realname=name, agentSupport=agentSupport, 
+																										agent=agent, showEvts=verbose,
+																										showSentEvts=verbose, showRecvEvts=verbose,
+																										caller=TestAdapterLib.caller(),
+																										agentType=AGENT_TYPE_EXPECTED)
 		self.logEventSent = logEventSent
 		self.logEventReceived = logEventReceived
 
@@ -408,8 +400,7 @@ class Client(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.ADP_TCP.isConnected(timeout=timeout, versionIp=versionIp, sourceIp=sourceIp, destinationIp=destinationIp, 
 											sourcePort=sourcePort, destinationPort=destinationPort)
@@ -446,8 +437,7 @@ class Client(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.ADP_TCP.isConnectedSsl(timeout=timeout, versionIp=versionIp, sourceIp=sourceIp, destinationIp=destinationIp, 
 											sourcePort=sourcePort, destinationPort=destinationPort, sslVersion=sslVersion, sslCipher=sslCipher)
@@ -482,8 +472,7 @@ class Client(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.ADP_TCP.isDisconnected(timeout=timeout, byServer=byServer, versionIp=versionIp, 
 						sourceIp=sourceIp, destinationIp=destinationIp, sourcePort=sourcePort, destinationPort=destinationPort)
@@ -555,8 +544,7 @@ class Client(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 	
 		# prepare expected response template 
 		tpl_rsp = TestTemplatesLib.TemplateMessage()
@@ -786,8 +774,7 @@ class Client(TestAdapterLib.Adapter):
 		@return: http response or none otherwise
 		@rtype:	templatemessage/templatelayer/none	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		if expected is None:
 			raise Exception( 'has received response: expected template cannot be empty' )
@@ -855,8 +842,7 @@ class Client(TestAdapterLib.Adapter):
 		"""
 		Make authentication function (basic, digest)
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		# prepare expected response template 
 		tpl_rsp401 = self.getTemplateResponse()
@@ -1004,8 +990,7 @@ class Client(TestAdapterLib.Adapter):
 		@return: http response
 		@rtype:	   template	  
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ):
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 
 		tpl = TestTemplatesLib.TemplateMessage()
 		   
@@ -1036,8 +1021,7 @@ class Client(TestAdapterLib.Adapter):
 		@return: connection result
 		@rtype: boolean
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		if not self.ADP_TCP.connected:
@@ -1067,8 +1051,7 @@ class Client(TestAdapterLib.Adapter):
 		@return: disconnection result
 		@rtype: boolean
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		if self.ADP_TCP.connected:
@@ -1116,8 +1099,7 @@ class Client(TestAdapterLib.Adapter):
 		@return: http response or none is no match
 		@rtype: templatemessage/none	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		__hdrs = { u'Host': u'%s' % host }
 
@@ -1188,8 +1170,7 @@ class Client(TestAdapterLib.Adapter):
 		@return: http response or none is no match
 		@rtype: templatemessage/none	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		__hdrs = { u'Host': u'%s' % host }
 
@@ -1260,8 +1241,7 @@ class Client(TestAdapterLib.Adapter):
 		@return: http response or none is no match
 		@rtype: templatemessage/none	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		__hdrs = { u'Host': u'%s' % host }
 
@@ -1334,8 +1314,7 @@ class Client(TestAdapterLib.Adapter):
 		@return: http response or none is no match
 		@rtype: templatemessage/none	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		__hdrs = { u'Host': u'%s' % host }
 
@@ -1416,8 +1395,7 @@ class Client(TestAdapterLib.Adapter):
 		@return: http response or none if no match
 		@rtype: templatemessage/none	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		__hdrs = { u'Host': u'%s' % host }
 
@@ -1507,8 +1485,7 @@ class Client(TestAdapterLib.Adapter):
 		@return: http response or none if no match
 		@rtype: templatemessage/none	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		__hdrs = { u'Host': u'%s' % host }
 		
@@ -1598,8 +1575,7 @@ class Client(TestAdapterLib.Adapter):
 		@return: http response or none if no match
 		@rtype: templatemessage/none	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		__hdrs = { u'Host': u'%s' % host }
 
@@ -1681,8 +1657,7 @@ class Client(TestAdapterLib.Adapter):
 		@return: http response or none is no match
 		@rtype: templatemessage/none	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.GET(uri=uri, host=host, timeout=timeout, headers=headers, login=login, password=password, versionExpected=versionExpected, codeExpected=codeExpected, phraseExpected=phraseExpected, headersExpected=headersExpected, bodyExpected=bodyExpected)
 	@doc_public
@@ -1734,8 +1709,7 @@ class Client(TestAdapterLib.Adapter):
 		@return: http response or none if no match
 		@rtype: templatemessage/none	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.POST(uri=uri, host=host, timeout=timeout, headers=headers, body=body, login=login, password=password, versionExpected=versionExpected, codeExpected=codeExpected, phraseExpected=phraseExpected, headersExpected=headersExpected, bodyExpected=bodyExpected,
 									overwriteCl=overwriteCl)
@@ -1788,8 +1762,7 @@ class Client(TestAdapterLib.Adapter):
 		@return: http response or none if no match
 		@rtype: templatemessage/none	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.PUT(uri=uri, host=host, timeout=timeout, headers=headers, body=body, login=login, password=password, versionExpected=versionExpected, codeExpected=codeExpected, phraseExpected=phraseExpected, headersExpected=headersExpected, 
 									overwriteCl=overwriteCl)
@@ -1842,8 +1815,7 @@ class Client(TestAdapterLib.Adapter):
 		@return: http response or none if no match
 		@rtype: templatemessage/none	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.TRACE(uri=uri, host=host, timeout=timeout, headers=headers, body=body, login=login, password=password, versionExpected=versionExpected, codeExpected=codeExpected, phraseExpected=phraseExpected, headersExpected=headersExpected, bodyExpected=bodyExpected,
 									overwriteCl=overwriteCl)		
@@ -1886,8 +1858,7 @@ class Client(TestAdapterLib.Adapter):
 		@return: http response or none is no match
 		@rtype: templatemessage/none	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.HEAD(uri=uri, host=host, timeout=timeout, headers=headers, login=login, password=password, versionExpected=versionExpected, codeExpected=codeExpected, phraseExpected=phraseExpected, headersExpected=headersExpected)		
 	@doc_public
@@ -1928,8 +1899,7 @@ class Client(TestAdapterLib.Adapter):
 		@return: http response or none is no match
 		@rtype: templatemessage/none	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.DELETE(uri=uri, host=host, timeout=timeout, headers=headers, login=login, password=password, versionExpected=versionExpected, codeExpected=codeExpected, phraseExpected=phraseExpected, headersExpected=headersExpected)
 			
@@ -1971,7 +1941,6 @@ class Client(TestAdapterLib.Adapter):
 		@return: http response or none is no match
 		@rtype: templatemessage/none	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.OPTIONS( uri=uri, host=host, timeout=timeout, headers=headers, login=login, password=password, versionExpected=versionExpected, codeExpected=codeExpected, phraseExpected=phraseExpected, headersExpected=headersExpected)

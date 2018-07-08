@@ -73,22 +73,13 @@ class Ping(TestAdapterLib.Adapter):
 
 		@param agent: agent to use when this mode is activated
 		@type agent: string/None
-		"""	
-		# check agent
-		if agentSupport and agent is None:
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "Agent cannot be undefined!" )	
-			
-		if agentSupport:
-			if not isinstance(agent, dict) : 
-				raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "agent argument is not a dict (%s)" % type(agent) )
-			if not len(agent['name']): 
-				raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "agent name cannot be empty" )
-			if  unicode(agent['type']) != unicode(AGENT_TYPE_EXPECTED): 
-				raise TestAdapterLib.ValueException(TestAdapterLib.caller(), 'Bad agent type: %s, expected: %s' % (agent['type'], unicode(AGENT_TYPE_EXPECTED))  )
-				
+		"""
 		# init adapter
-		TestAdapterLib.Adapter.__init__(self, name = __NAME__, parent = parent, debug=debug, shared=shared, 
-																			realname=name, agentSupport=agentSupport, agent=agent)
+		TestAdapterLib.Adapter.__init__(self, name = __NAME__, parent = parent, 
+																										debug=debug, shared=shared, 
+																										realname=name, agentSupport=agentSupport, agent=agent,
+																										caller=TestAdapterLib.caller(),
+																										agentType=AGENT_TYPE_EXPECTED)
 		self.icmp = sniffer.SnifferV4(parent=parent, debug=debug, logEventSent=True, logEventReceived=True,
 																				shared=shared, agentSupport=agentSupport, agent=agent )
 		
@@ -134,8 +125,7 @@ class Ping(TestAdapterLib.Adapter):
 		@return: pong response
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		self.icmp.startListening(eth=interface, srcIp=source )
 		ipSniffing = self.icmp.isSniffing( timeout=timeout )

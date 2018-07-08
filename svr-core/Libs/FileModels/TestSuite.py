@@ -48,14 +48,24 @@ import re
 
 r = re.compile( u"[^\x09\x0A\x0D\x20-\x7E\x85\xA0-\xFF\u0100-\uD7FF\uE000-\uFDCF\uFDE0-\uFFFD]")
 def removeInvalidXML(string):
-  def replacer(m):
-    return ""
-  return re.sub(r,replacer,string)
+    """
+    Remove invalid XML
+    """
+    def replacer(m):
+        """
+        return empty string
+        """
+        return ""
+    return re.sub(r,replacer,string)
   
-DEFAULT_INPUTS = [ {'type': 'bool', 'name': 'DEBUG', 'description': '', 'value' : 'False', 'color': '' },
-                    {'type': 'float', 'name': 'TIMEOUT', 'description': '', 'value' : '1.0', 'color': '' },
-                    {'type': 'bool', 'name': 'VERBOSE', 'description': '', 'value' : 'True', 'color': '' } ]
-DEFAULT_OUTPUTS = [ {'type': 'float', 'name': 'TIMEOUT', 'description': '', 'value' : '1.0', 'color': '' } ]
+DEFAULT_INPUTS = [ {'type': 'bool', 'name': 'DEBUG', 'description': '', 
+                    'value' : 'False', 'color': '',  'scope': 'local' },
+                    {'type': 'float', 'name': 'TIMEOUT', 'description': '', 
+                     'value' : '1.0', 'color': '',  'scope': 'local' },
+                    {'type': 'bool', 'name': 'VERBOSE', 'description': '', 
+                    'value' : 'True', 'color': '',  'scope': 'local' } ]
+DEFAULT_OUTPUTS = [ {'type': 'float', 'name': 'TIMEOUT', 'description': '', 
+                     'value' : '1.0', 'color': '',  'scope': 'local' } ]
 DEFAULT_AGENTS = [ { 'name': 'AGENT', 'description': '', 'value' : 'agent-dummy01', 'type': 'dummy' } ]
 
 def bytes2str(val):
@@ -71,8 +81,8 @@ class DataModel(GenericModel.GenericModel):
     """
     Data model for test suite
     """
-    def __init__ (self, userName='unknown', testDef='', testExec='', defLibrary='', 
-                  defAdapter='', timeout="10.0", inputs=[], outputs=[]):
+    def __init__ (self, userName='unknown', testDef='', testExec='', 
+                  defLibrary='', defAdapter='', timeout="10.0", inputs=[], outputs=[]):
         """
         This class describes the model of one script document, and provides a xml <=> python encoder
         The following xml :
@@ -435,6 +445,17 @@ class DataModel(GenericModel.GenericModel):
                         self.fixXML( data = properties['descriptions'], key = 'description' )
                         if '@description' in properties['descriptions']:
                             self.fixXML( data = properties['descriptions'], key = '@description' )
+                            
+                        # BEGIN NEW in 19.0.0 : add missing scope parameters
+                        for p in properties['inputs-parameters']['parameter']:
+                            if "scope" not in p: 
+                                p["scope"] = "local"
+                                p["@scope"] = {}
+                        for p in properties['outputs-parameters']['parameter']:
+                            if "scope" not in p: 
+                                p["scope"] = "local"
+                                p["@scope"] = {}
+                        # END OF NEW
                     except Exception as e:
                         self.error( "TestSuite >  fix xml %s" % str(e) )
                     else:

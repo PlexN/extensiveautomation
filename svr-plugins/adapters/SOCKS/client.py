@@ -63,7 +63,9 @@ class Client(TestAdapterLib.Adapter):
 		@param debug: active debug mode (default=False)
 		@type debug:	boolean
 		"""
-		TestAdapterLib.Adapter.__init__(self, name = __NAME__, parent = parent, debug=debug, realname=name, showEvts=verbose, showSentEvts=verbose, showRecvEvts=verbose)
+		TestAdapterLib.Adapter.__init__(self, name = __NAME__, parent = parent, debug=debug, 
+																									realname=name, showEvts=verbose, 
+																									showSentEvts=verbose, showRecvEvts=verbose)
 		self.codecX2D = Xml2Dict.Xml2Dict()
 		self.codecD2X = Dict2Xml.Dict2Xml(coding = None)
 		self.cfg = {}

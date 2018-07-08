@@ -94,17 +94,11 @@ class Windows(TestAdapterLib.Adapter):
 		@param shared: shared adapter (default=False)
 		@type shared:	boolean
 		"""
-		# check the agent
-		if not isinstance(agent, dict) : 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "agent argument is not a dict (%s)" % type(agent) )
-		if not len(agent['name']): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "agent name cannot be empty" )
-		if  unicode(agent['type']) != unicode(AGENT_TYPE_EXPECTED): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), 'Bad agent type: %s, expected: %s' % (agent['type'], unicode(AGENT_TYPE_EXPECTED))  )
-		
 		# init adapter
 		TestAdapterLib.Adapter.__init__(self, name = __NAME__, parent = parent, debug=debug,
-																		realname=name, agentSupport=True, agent=agent, shared=shared)
+																									realname=name, agentSupport=True, agent=agent, shared=shared,
+																									caller=TestAdapterLib.caller(),
+																									agentType=AGENT_TYPE_EXPECTED)
 		self.codecX2D = Xml2Dict.Xml2Dict()
 		self.codecD2X = Dict2Xml.Dict2Xml(coding = None)
 		self.logEventSent = logEventSent
@@ -406,8 +400,7 @@ class Windows(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		layer_win=templates.windows(event='response') 
 		evt = self.received( expected = self.encapsule(win_event=layer_win), timeout = self.__computeTimeout(timeout) )
@@ -575,8 +568,7 @@ class Windows(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		self.execCommand(cmd=cmd, timeout=timeout)
 		return self.hasReceivedResponse(timeout=self.__computeTimeout(timeout) )
@@ -591,8 +583,7 @@ class Windows(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		self.getSystemInfo(timeout=timeout)
 		return self.hasReceivedResponse(timeout=self.__computeTimeout(timeout) )
@@ -607,8 +598,7 @@ class Windows(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		self.getDisks(timeout=timeout)
 		return self.hasReceivedResponse(timeout=self.__computeTimeout(timeout) )
@@ -623,8 +613,7 @@ class Windows(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		self.getMemUsage(timeout=timeout)
 		return self.hasReceivedResponse(timeout=self.__computeTimeout(timeout) )
@@ -639,8 +628,7 @@ class Windows(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		self.getCpuLoad(timeout=timeout)
 		return self.hasReceivedResponse(timeout=self.__computeTimeout(timeout) )
@@ -655,8 +643,7 @@ class Windows(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		self.getUptime(timeout=timeout)
 		return self.hasReceivedResponse(timeout=self.__computeTimeout(timeout) )
@@ -671,8 +658,7 @@ class Windows(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		self.getProcesses(timeout=timeout)
 		return self.hasReceivedResponse(timeout=self.__computeTimeout(timeout) )
@@ -687,8 +673,7 @@ class Windows(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		self.getOs(timeout=timeout)
 		return self.hasReceivedResponse(timeout=self.__computeTimeout(timeout) )
@@ -703,8 +688,7 @@ class Windows(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		self.getHostname(timeout=timeout)
 		return self.hasReceivedResponse(timeout=self.__computeTimeout(timeout) )

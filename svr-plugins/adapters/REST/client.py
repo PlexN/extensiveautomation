@@ -137,20 +137,11 @@ class Client(TestAdapter.Adapter):
 		@param keyfile: path to the key file (default=None)
 		@type keyfile: string/none
 		"""
-		# check agent
-		if agentSupport and agent is None:
-			raise TestAdapter.ValueException(TestAdapter.caller(), "Agent cannot be undefined!" )
-		if agentSupport:
-			if not isinstance(agent, dict) : 
-				raise TestAdapter.ValueException(TestAdapter.caller(), "agent argument is not a dict (%s)" % type(agent) )
-			if not len(agent['name']): 
-				raise TestAdapter.ValueException(TestAdapter.caller(), "agent name cannot be empty" )
-			if  unicode(agent['type']) != unicode(AGENT_TYPE_EXPECTED): 
-				raise TestAdapter.ValueException(TestAdapter.caller(), 'Bad agent type: %s, expected: %s' % (agent['type'], unicode(AGENT_TYPE_EXPECTED))  )
-
 		# init adapter
 		TestAdapter.Adapter.__init__(self, name = __NAME__, parent = parent, debug=debug, shared=shared, 
-																	realname=name, agentSupport=agentSupport, agent=agent)
+																							realname=name, agentSupport=agentSupport, agent=agent,
+																							caller=TestAdapter.caller(),
+																							agentType=AGENT_TYPE_EXPECTED)
 		self.logEventSent = logEventSent
 		self.logEventReceived = logEventReceived
 
@@ -317,8 +308,7 @@ class Client(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		return self.ADP_HTTP.isConnected(timeout=timeout, versionIp=versionIp, sourceIp=sourceIp, destinationIp=destinationIp, 
 											sourcePort=sourcePort, destinationPort=destinationPort)
@@ -353,8 +343,7 @@ class Client(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		return self.ADP_HTTP.isDisconnected(timeout=timeout, byServer=byServer, versionIp=versionIp, 
 						sourceIp=sourceIp, destinationIp=destinationIp, sourcePort=sourcePort, destinationPort=destinationPort)
@@ -495,8 +484,7 @@ class Client(TestAdapter.Adapter):
 		@return: http response
 		@rtype:	template	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		evt = self.received( expected = expected, timeout = timeout )
 		if evt is None:
@@ -529,8 +517,7 @@ class Client(TestAdapter.Adapter):
 		@return: http response
 		@rtype:	template	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		tpl = TestTemplates.TemplateMessage()
 		

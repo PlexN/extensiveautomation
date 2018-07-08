@@ -52,14 +52,24 @@ import re
 
 r = re.compile( u"[^\x09\x0A\x0D\x20-\x7E\x85\xA0-\xFF\u0100-\uD7FF\uE000-\uFDCF\uFDE0-\uFFFD]")
 def removeInvalidXML(string):
-  def replacer(m):
-    return ""
-  return re.sub(r,replacer,string)
-  
-DEFAULT_INPUTS = [ {'type': 'bool', 'name': 'DEBUG', 'description': '', 'value' : 'False', 'color': '' },
-                    {'type': 'float', 'name': 'TIMEOUT', 'description': '', 'value' : '1.0', 'color': '' },
-                    {'type': 'bool', 'name': 'VERBOSE', 'description': '', 'value' : 'True', 'color': '' } ]
-DEFAULT_OUTPUTS = [ {'type': 'float', 'name': 'TIMEOUT', 'description': '', 'value' : '1.0', 'color': '' } ]
+    """
+    Remove invalid XML
+    """
+    def replacer(m):
+        """
+        return empty string
+        """
+        return ""
+    return re.sub(r,replacer,string)
+
+DEFAULT_INPUTS = [ {'type': 'bool', 'name': 'DEBUG', 'description': '', 
+                    'value' : 'False', 'color': '',  'scope': 'local' },
+                    {'type': 'float', 'name': 'TIMEOUT', 'description': '', 
+                     'value' : '1.0', 'color': '',  'scope': 'local' },
+                    {'type': 'bool', 'name': 'VERBOSE', 'description': '', 
+                    'value' : 'True', 'color': '',  'scope': 'local' } ]
+DEFAULT_OUTPUTS = [ {'type': 'float', 'name': 'TIMEOUT', 'description': '', 
+                    'value' : '1.0', 'color': '',  'scope': 'local' } ]
 DEFAULT_AGENTS = [ { 'name': 'AGENT', 'description': '', 'value' : 'agent-dummy01', 'type': 'dummy' } ]
 
 IF_OK = "0"
@@ -289,6 +299,7 @@ class DataModel(GenericModel.GenericModel):
 
     def fixOrphan(self):
         """
+        Fix orphan test
         """
         orphansDetected = []
         for i in xrange(len(self.testplan['testplan']['testfile'])):
@@ -308,6 +319,7 @@ class DataModel(GenericModel.GenericModel):
         
     def findTest(self, testId):
         """
+        Find a test
         """
         test = None
         for t in self.testplan['testplan']['testfile']:
@@ -455,6 +467,7 @@ class DataModel(GenericModel.GenericModel):
 
     def __submerge(self, paramName, parameters):
         """
+        Recursive function to merge 
         """
         paramFound = False
         for inputDict in parameters:
@@ -465,6 +478,7 @@ class DataModel(GenericModel.GenericModel):
 
     def cleartTestParameters(self, itemId):
         """
+        Clear test parameters
         """
         testSuites = self.testplan['testplan']['testfile']
         for i in xrange(len(testSuites)):
@@ -478,6 +492,7 @@ class DataModel(GenericModel.GenericModel):
         
     def cleartAllTestParameters(self):
         """
+        Clear all test parameters
         """
         testSuites = self.testplan['testplan']['testfile']
         for i in xrange(len(testSuites)):
@@ -729,7 +744,7 @@ class DataModel(GenericModel.GenericModel):
                 xmlDataList.append( self.codecD2X.parseDict( dico = self.testplan ) )
             xmlDataList.append('<testdevelopment>%s</testdevelopment>' % unicode(self.testdev) )
             xmlDataList.append('</file>')
-
+                
             ret = '\n'.join(xmlDataList)
             
             # remove all invalid xml data
@@ -932,7 +947,18 @@ class DataModel(GenericModel.GenericModel):
                         if '@description' in properties['descriptions']:
                             self.fixXML( data = properties['descriptions'], key = '@description' )
                         # END NEW in 2.0.0
-
+                        
+                        # BEGIN NEW in 19.0.0 : add missing scope parameters
+                        for p in properties['inputs-parameters']['parameter']:
+                            if "scope" not in p: 
+                                p["scope"] = "local"
+                                p["@scope"] = {}
+                        for p in properties['outputs-parameters']['parameter']:
+                            if "scope" not in p: 
+                                p["scope"] = "local"
+                                p["@scope"] = {}
+                        # END OF NEW
+                        
                         self.fixXML( data = testplan, key = 'testfile' )
                         self.fixXML( data = testplan, key = '@testfile' )
 
@@ -1013,7 +1039,18 @@ class DataModel(GenericModel.GenericModel):
                             self.fixXML( data = ts['properties']['outputs-parameters'], key = 'parameter' )
                             if '@parameter' in ts['properties']['outputs-parameters']:
                                 self.fixXML( data = ts['properties']['outputs-parameters'], key = '@parameter' )
-
+                        
+                            # BEGIN NEW in 19.0.0 : add missing scope parameters
+                            for p in ts['properties']['inputs-parameters']['parameter']:
+                                if "scope" not in p: 
+                                    p["scope"] = "local"
+                                    p["@scope"] = {}
+                            for p in ts['properties']['outputs-parameters']['parameter']:
+                                if "scope" not in p: 
+                                    p["scope"] = "local"
+                                    p["@scope"] = {}
+                            # END OF NEW
+                        
                             if sys.version_info < (3,): # python3 support
                                 self.fixParameterstoUTF8(val=ts['properties']['inputs-parameters']['parameter'])
                                 self.fixParameterstoUTF8(val=ts['properties']['outputs-parameters']['parameter'])

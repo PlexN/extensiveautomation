@@ -35,13 +35,17 @@
 		31. (major) new code source files tree organization, to be more clear
 		32. (medium) rest api: integration of the find test usage feature (pull request #18)
 		33. (medium) test interop: extensivetesting plugin renamed to extensiveautomation
-		34. (major) product renamed to extensive automation (TBC!!!)
+		34. (major) product renamed to extensive automation
 		35. (minor) new basic scenarios in snippets part
-		36. (medium) test library: new advanced test properties
+		36. (medium) test library: new custom json test properties
 		37. (major) all file models updated to support the new "scope" attribute in test parameters
 		38. (major) test library: new feature to save in the cache all parameters with the scope equals to cache
 		39. (medium) build: new curl package embedded by default
 		40. (minor) nodejs v6 removed from package
+		41. (minor) code factory in adapters; new functions to check agent and timeout for adapter in test library
+		42. (major) test library: shared test parameter renamed to global
+		43. (major) test library/test model: important improvement of the custom json parameter
+		44. (medium) docker support (pull request #19)
 	Issues Fixed
 		1. (minor) fix typo error in logs messages
 		2. (medium) fix regression, unable to generate test design with test global only
@@ -53,3 +57,4 @@
 		8. (medium) web server: unable to display test report in test results part
 		9. (minor) test executor: fix issue #13 - getSize function missing on template message
 		10. (medium) test library: fix encoding in test operators
+		11. (minor) test creator: fix issue on capture regex

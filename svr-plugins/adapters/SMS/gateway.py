@@ -79,19 +79,11 @@ class Gateway(TestAdapter.Adapter):
 		@param checkInterval: interval to check the mailbox (default=10s)
 		@type checkInterval: integer
 		"""
-		# check agent
-		if agentSupport and agent is None:
-			raise TestAdapter.ValueException(TestAdapter.caller(), "Agent cannot be undefined!" )
-			
-		if agentSupport:
-			if not isinstance(agent, dict) : 
-				raise TestAdapter.ValueException(TestAdapter.caller(), "agent argument is not a dict (%s)" % type(agent) )
-			if not len(agent['name']): 
-				raise TestAdapter.ValueException(TestAdapter.caller(), "agent name cannot be empty" )
-			if  unicode(agent['type']) != unicode(AGENT_TYPE_EXPECTED): 
-				raise TestAdapter.ValueException(TestAdapter.caller(), 'Bad agent type: %s, expected: %s' % (agent['type'], unicode(AGENT_TYPE_EXPECTED))  )
-		
-		TestAdapter.Adapter.__init__(self, name = __NAME__, parent = parent, debug=debug, realname=name, shared=shared)
+		TestAdapter.Adapter.__init__(self, name = __NAME__, parent = parent, debug=debug, 
+																							realname=name, shared=shared,
+																							agentSupport=agentSupport, agent=agent,
+																							caller=TestAdapter.caller(),
+																							agentType=AGENT_TYPE_EXPECTED)
 		
 		self.parent = parent
 		self.codecX2D = Xml2Dict.Xml2Dict()
@@ -298,8 +290,7 @@ class Gateway(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		tpl_expected = self.encapsule( layer_sms=templates.sms(action=SMS_SENT, actionId=actionId, result=RESULT_OK))
 		evt = self.received( expected = tpl_expected, timeout = timeout )
@@ -322,8 +313,7 @@ class Gateway(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		tpl_expected = self.encapsule( layer_sms=templates.sms(action=SMS_RECEIVED, phone=phone, msg=msg))
 		evt = self.received( expected = tpl_expected, timeout = timeout )

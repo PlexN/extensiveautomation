@@ -125,8 +125,11 @@ class Client(TestAdapter.Adapter):
 			raise TestAdapter.ValueException(TestAdapter.caller(), "destPort argument is not a integer (%s)" % type(destPort) )
 
 		# init adapter
-		TestAdapter.Adapter.__init__(self, name = __NAME__, parent = parent, debug=debug, realname=name, shared=shared,
-																								showEvts=verbose, showSentEvts=verbose, showRecvEvts=verbose)
+		TestAdapter.Adapter.__init__(self, name = __NAME__, parent = parent, debug=debug, 
+																								realname=name, shared=shared,
+																								showEvts=verbose, showSentEvts=verbose, showRecvEvts=verbose,
+																								caller=TestAdapter.caller(),
+																								agentType=AGENT_TYPE_EXPECTED)
 		self.codecX2D = Xml2Dict.Xml2Dict()
 		self.codecD2X = Dict2Xml.Dict2Xml(coding = None)
 		
@@ -606,8 +609,7 @@ class Client(TestAdapter.Adapter):
 		@param watchEvery: watch folder every xx seconds (default=0.5s)
 		@type watchEvery: float					
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		ret = False
 		if not self.__logged:
@@ -664,8 +666,7 @@ class Client(TestAdapter.Adapter):
 		@param watchEvery: watch folder every xx seconds (default=0.5s)
 		@type watchEvery: float				
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		ret = False
 		if not self.__logged:
@@ -716,8 +717,7 @@ class Client(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		return self.ADP_SSH.isConnected(timeout=timeout)
 	@doc_public
@@ -731,8 +731,7 @@ class Client(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		return self.ADP_SSH.isChannelOpened(timeout=timeout)
 		
@@ -747,8 +746,7 @@ class Client(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 
 		return self.ADP_SSH.isDisconnected(timeout=timeout)
 	@doc_public
@@ -762,8 +760,7 @@ class Client(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 	
 		if not self.__logged:
 			self.warning( "not logged" )
@@ -784,8 +781,7 @@ class Client(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		if not self.__logged:
 			self.warning( "not logged" )
@@ -806,8 +802,7 @@ class Client(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		if not self.__logged:
 			self.warning( "not logged" )
@@ -828,8 +823,7 @@ class Client(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		if not self.__logged:
 			self.warning( "not logged" )
@@ -850,8 +844,7 @@ class Client(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		if not self.__logged:
 			self.warning( "not logged" )
@@ -872,8 +865,7 @@ class Client(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		if not self.__logged:
 			self.warning( "not logged" )
@@ -894,8 +886,7 @@ class Client(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		if not self.__logged:
 			self.warning( "not logged" )
@@ -916,8 +907,7 @@ class Client(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		if not self.__logged:
 			self.warning( "not logged" )
@@ -943,8 +933,7 @@ class Client(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		if not self.__logged:
 			self.warning( "not logged" )
@@ -970,8 +959,7 @@ class Client(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		if not self.__logged:
 			self.warning( "not logged" )
@@ -991,8 +979,7 @@ class Client(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		if not self.__logged:
 			self.warning( "not logged" )
@@ -1012,8 +999,7 @@ class Client(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		if not self.__logged:
 			self.warning( "not logged" )
@@ -1033,8 +1019,7 @@ class Client(TestAdapter.Adapter):
 		@return: True is successfully connected, false otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 			
 		ret = True
 		self.connect()
@@ -1054,8 +1039,7 @@ class Client(TestAdapter.Adapter):
 		@return: True is successfully disconnected, false otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		ret = True
 		self.disconnect()

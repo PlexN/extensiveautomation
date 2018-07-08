@@ -27,6 +27,7 @@ Cache properties module
 
 import sys
 import json
+import re
 
 # unicode = str with python3
 if sys.version_info > (3,):
@@ -341,23 +342,35 @@ class CacheViewerQWidget(QWidget, Logger.ClassLogger):
     def __read_params(self, params, cache_preview):
         """
         """
-        # read inputs-parameters
         for inp in params:
+            if inp["type"] in [ "text", "custom" ]:
+                captures = re.findall("\[!CAPTURE:[\w-]+(?:\:.*?)??\:\]", inp["value"])
+                for c in captures:
+                    k = c.split("[!CAPTURE:")[1].split(":", 1)[0]
+                    tmp_param = {"name": k,  "value": "", "type": "str" }
+                    if not self.__already_exists(cache=cache_preview, name=k):
+                        cache_preview.append(tmp_param)
             if inp["scope"] == "cache":
-                if inp["type"] == "advanced":
-                
+                if inp["type"] == "json":
+                    if not len(inp["value"]):
+                        continue
+                        
                     if not self.__already_exists(cache=cache_preview, name=inp["name"]):
                         cache_preview.append( {"name": inp["name"], 
                                                "value": inp["value"], 
                                                "type": inp["type"] } )
-                    
-                    parsed = json.loads(inp["value"])
+
+                    custom_json = re.sub(r"#.*", "", inp["value"])
+                    custom_json = re.sub(r"\[!INPUT:[\w-]+(?:\:[\w-]+)*\:\]", "true", custom_json)
+                    custom_json = re.sub(r"\[!CACHE:[\w-]+(?:\:[\w-]+)*\:\]", "true", custom_json)
+            
+                    parsed = json.loads(custom_json)
                     if isinstance(parsed, dict):
                         for k,v in parsed.items():
                             val_name = "%s_%s" % (inp["name"],k)
                             tmp_param = {"name": val_name, 
                                          "value": "%s" % v, 
-                                         "type": "advanced" }
+                                         "type": "json" }
                             
                             if not self.__already_exists(cache=cache_preview, name=val_name):
                                 cache_preview.append(tmp_param)

@@ -44,7 +44,8 @@ OPENSSL_BIN = "/usr/bin/openssl"
 
 class OpenSSL(TestAdapter.Adapter):
 	@doc_public	
-	def __init__(self, parent, name=None, debug=False, shared=False, agentSupport=False, agent=None, logEventSent=True, logEventReceived=True):
+	def __init__(self, parent, name=None, debug=False, shared=False, agentSupport=False, 
+											agent=None, logEventSent=True, logEventReceived=True):
 		"""
 		OpenSSL wrapper
 
@@ -66,19 +67,11 @@ class OpenSSL(TestAdapter.Adapter):
 		@param agent: agent to use (default=None)
 		@type agent: string/none
 		"""
-		# check the agent
-		if agentSupport and agent is None:
-			raise TestAdapter.ValueException(TestAdapter.caller(), "Agent cannot be undefined!" )
-		if agentSupport:
-			if not isinstance(agent, dict) : 
-				raise TestAdapter.ValueException(TestAdapter.caller(), "agent argument is not a dict (%s)" % type(agent) )
-			if not len(agent['name']): 
-				raise TestAdapter.ValueException(TestAdapter.caller(), "agent name cannot be empty" )
-			if  unicode(agent['type']) != unicode(AGENT_TYPE_EXPECTED): 
-				raise TestAdapter.ValueException(TestAdapter.caller(), 'Bad agent type: %s, expected: %s' % (agent['type'], unicode(AGENT_TYPE_EXPECTED))  )
-		
-		TestAdapter.Adapter.__init__(self, name = __NAME__, parent = parent, debug=debug, realname=name,
-																							agentSupport=agentSupport, agent=agent, shared=shared)
+		TestAdapter.Adapter.__init__(self, name = __NAME__, parent = parent, 
+																							debug=debug, realname=name,
+																							agentSupport=agentSupport, agent=agent, shared=shared,
+																							caller=TestAdapter.caller(),
+																							agentType=AGENT_TYPE_EXPECTED)
 		self.parent = parent
 		
 		self.logEventSent = logEventSent
@@ -231,8 +224,7 @@ class OpenSSL(TestAdapter.Adapter):
 		@return: openssl event or none otherwise
 		@rtype:	templatemessage/templatelayer/none	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 
 		tpl_expected = TestTemplates.TemplateMessage()
 		layer_openssl = TestTemplates.TemplateLayer('OPENSSL')

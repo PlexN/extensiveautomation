@@ -87,21 +87,11 @@ class Ansible(TestAdapterLib.Adapter):
           @type host_py: string
 
           """
-        # check the agent
-        if agentSupport and agent is None:
-            raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "Agent cannot be undefined!")
-        if agentSupport:
-            if not isinstance(agent, dict):
-                raise TestAdapterLib.ValueException(TestAdapterLib.caller(),
-                                                    "agent argument is not a dict (%s)" % type(agent))
-            if not len(agent['name']):
-                raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "agent name cannot be empty")
-            if unicode(agent['type']) != unicode(self.AGENT_TYPE_EXPECTED):
-                raise TestAdapterLib.ValueException(TestAdapterLib.caller(), 'Bad agent type: %s, expected: %s' % (
-                    agent['type'], unicode(self.AGENT_TYPE_EXPECTED)))
-
         TestAdapterLib.Adapter.__init__(self, name=self.__NAME__, parent=parent, debug=debug, realname=name,
-                                        agentSupport=agentSupport, agent=agent, shared=shared)
+                                                       agentSupport=agentSupport, agent=agent, shared=shared,
+                                                       caller=TestAdapterLib.caller(),
+                                                       agentType=AGENT_TYPE_EXPECTED)
+
         self.parent = parent
         self.codecX2D = Xml2Dict.Xml2Dict()
         self.codecD2X = Dict2Xml.Dict2Xml(coding=None)

@@ -1,5 +1,4 @@
 <ul>
-    <li>Blaise Cador - security recommendations</li>
     <li>Denys Bortovets
         <ul>
             <li>new scripts to build mac version</li>
@@ -18,7 +17,13 @@
             <li>ssh plugin recorder for client</li>
         </ul>
     </li>
+    <li>Thibault Lecoq
+        <ul>
+            <li>docker support</li>
+            <li>bugs announcement</li>
+        </ul>
+    </li>
     <li>Jean-Luc Pascal - support excel writting mode in library</li>
     <li>Jordane Fillatre - kafka adapter and agent</li>
-    <li>Thibault Lecoq - bugs announcement</li>
+    <li>Blaise Cador - security recommendations</li>
 </ul>

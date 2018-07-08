@@ -106,21 +106,11 @@ class Phone(TestAdapterLib.Adapter):
 		@param shared: shared adapter (default=False)
 		@type shared:	boolean
 		"""
-		# check agent
-		if agentSupport and agent is None:
-			raise Exception('Agent cannot be undefined!')	
-		
-		if agentSupport:
-			if not isinstance(agent, dict):
-				raise Exception('Bad value passed on agent!')						
-			if not len(agent['name']):
-				raise Exception('Agent name cannot be empty!')	
-			if unicode(agent['type']) != unicode(AGENT_TYPE_EXPECTED):
-				raise Exception('Bad agent type: %s, expected: %s' % (agent['type'], unicode(AGENT_TYPE_EXPECTED)) )	
-		
-		
-		TestAdapterLib.Adapter.__init__(self, name = __NAME__, parent = parent, debug=debug, shared=shared, 
-														realname=name, agentSupport=agentSupport, agent=agent)
+		TestAdapterLib.Adapter.__init__(self, name = __NAME__, parent = parent, 
+																										debug=debug, shared=shared, 
+																										realname=name, agentSupport=agentSupport, agent=agent,
+																										caller=TestAdapterLib.caller(),
+																										agentType=AGENT_TYPE_EXPECTED)
 		if not isinstance(sipSrc, tuple):
 			raise Exception('bad type on sip src argument, tuple expected (ip,port)')
 		if not isinstance(sipDest, tuple):
@@ -629,8 +619,7 @@ class Phone(TestAdapterLib.Adapter):
 		@return: plug result
 		@rtype:	boolean
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		if self.started:
 			self.debug('already plugged')
@@ -663,8 +652,7 @@ class Phone(TestAdapterLib.Adapter):
 		@return: unplug result
 		@rtype:	boolean
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		self.started = False
 		
@@ -854,8 +842,7 @@ class Phone(TestAdapterLib.Adapter):
 		@return: sip phone event
 		@rtype:	templatemessage/none
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		expected = templates.registered(expire=interval)
 		evt = self.received( expected = expected, timeout = timeout )
@@ -874,8 +861,7 @@ class Phone(TestAdapterLib.Adapter):
 		@return: sip phone event
 		@rtype:	templatemessage/none
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		expected = templates.unregistered()
 		evt = self.received( expected = expected, timeout = timeout )
@@ -894,8 +880,7 @@ class Phone(TestAdapterLib.Adapter):
 		@return: session identifier
 		@rtype:	integer/none
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		expected = templates.ringing()
 		evt = self.received( expected = expected, timeout = timeout )
@@ -927,8 +912,7 @@ class Phone(TestAdapterLib.Adapter):
 		@return: session identifier
 		@rtype:	integer/none
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		expected = templates.incomingcall(cli=cli, display=display, diversion=diversion, assertedidentity=assertedIdentity)	
 		evt = self.received( expected = expected, timeout = timeout )
@@ -955,8 +939,7 @@ class Phone(TestAdapterLib.Adapter):
 		@return: sip phone event
 		@rtype:	templatemessage/none
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		sess = self.sessionsManager.get(id=sessionid)
 		if sess is None:
@@ -982,8 +965,7 @@ class Phone(TestAdapterLib.Adapter):
 		@return: sip phone event
 		@rtype:	templatemessage/none
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		sess = self.sessionsManager.get(id=sessionid)
 		if sess is None:
@@ -1006,8 +988,7 @@ class Phone(TestAdapterLib.Adapter):
 		@return: sip phone event
 		@rtype:	templatemessage/none
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		sess = self.sessionsManager.get(id=sessionid)
 		if sess is None:
@@ -1040,8 +1021,7 @@ class Phone(TestAdapterLib.Adapter):
 		@return: sip phone event
 		@rtype:	templatemessage/none
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		expected = templates.unexpected_response(sessid=sessionid, code=code, phrase=phrase)	
 		evt = self.received( expected = expected, timeout = timeout )
@@ -1063,8 +1043,7 @@ class Phone(TestAdapterLib.Adapter):
 		@return: sip phone event
 		@rtype:	templatemessage/none
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		sess = self.sessionsManager.get(id=sessionid)
 		if sess is None:
@@ -1097,8 +1076,7 @@ class Phone(TestAdapterLib.Adapter):
 		@return: sip phone event
 		@rtype:	templatemessage/none
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		sess = self.sessionsManager.get(id=sessionid)
 		if sess is None:
@@ -1125,8 +1103,7 @@ class Phone(TestAdapterLib.Adapter):
 		@return: sip phone event
 		@rtype:	templatemessage/none
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		sess = self.sessionsManager.get(id=sessionid)
 		if sess is None:
@@ -1152,8 +1129,7 @@ class Phone(TestAdapterLib.Adapter):
 		@return: sip phone event
 		@rtype:	templatemessage/none
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		sess = self.sessionsManager.get(id=sessionid)
 		if sess is None:

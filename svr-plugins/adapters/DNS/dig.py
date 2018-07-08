@@ -25,7 +25,7 @@
 import TestExecutorLib.TestValidatorsLib as TestValidators
 import TestExecutorLib.TestTemplatesLib as TestTemplates
 import TestExecutorLib.TestOperatorsLib as TestOperators
-import TestExecutorLib.TestAdapterLib as TestAdapter
+import TestExecutorLib.TestAdapterLib as TestAdapterLib
 import TestExecutorLib.TestLibraryLib as TestLibrary
 from TestExecutorLib.TestExecutorLib import doc_public
 
@@ -42,9 +42,10 @@ AGENT_TYPE_EXPECTED='myagent'
 
 DIG_BIN = "/usr/bin/dig"
 
-class Dig(TestAdapter.Adapter):
+class Dig(TestAdapterLib.Adapter):
 	@doc_public	
-	def __init__(self, parent, name=None, debug=False, shared=False, agentSupport=False, agent=None, logEventSent=True, logEventReceived=True):
+	def __init__(self, parent, name=None, debug=False, shared=False, agentSupport=False, 
+											agent=None, logEventSent=True, logEventReceived=True):
 		"""
 		Dig wrapper
 
@@ -66,19 +67,12 @@ class Dig(TestAdapter.Adapter):
 		@param agent: agent to use (default=None)
 		@type agent: string/none
 		"""
-		# check the agent
-		if agentSupport and agent is None:
-			raise TestAdapter.ValueException(TestAdapter.caller(), "Agent cannot be undefined!" )
-		if agentSupport:
-			if not isinstance(agent, dict) : 
-				raise TestAdapter.ValueException(TestAdapter.caller(), "agent argument is not a dict (%s)" % type(agent) )
-			if not len(agent['name']): 
-				raise TestAdapter.ValueException(TestAdapter.caller(), "agent name cannot be empty" )
-			if  unicode(agent['type']) != unicode(AGENT_TYPE_EXPECTED): 
-				raise TestAdapter.ValueException(TestAdapter.caller(), 'Bad agent type: %s, expected: %s' % (agent['type'], unicode(AGENT_TYPE_EXPECTED))  )
-		
-		TestAdapter.Adapter.__init__(self, name = __NAME__, parent = parent, debug=debug, realname=name,
-																							agentSupport=agentSupport, agent=agent, shared=shared)
+		TestAdapterLib.Adapter.__init__(self, name = __NAME__, parent = parent, 
+																									debug=debug, realname=name,
+																									agentSupport=agentSupport, 
+																									agent=agent, shared=shared,
+																									caller=TestAdapterLib.caller(),
+																									agentType=AGENT_TYPE_EXPECTED)
 		self.parent = parent
 		
 		self.logEventSent = logEventSent
@@ -92,7 +86,7 @@ class Dig(TestAdapter.Adapter):
 			self.cfg['agent-name'] = agent['name']
 		self.cfg['agent-support'] = agentSupport
 		
-		self.TIMER_ALIVE_AGT = TestAdapter.Timer(parent=self, duration=20, name="keepalive-agent", callback=self.aliveAgent,
+		self.TIMER_ALIVE_AGT = TestAdapterLib.Timer(parent=self, duration=20, name="keepalive-agent", callback=self.aliveAgent,
 																																logEvent=False, enabled=True)
 		self.__checkConfig()
 		
@@ -231,8 +225,7 @@ class Dig(TestAdapter.Adapter):
 		@return: dig event or none otherwise
 		@rtype:	templatemessage/templatelayer/none	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		if expected is None:
 			raise Exception( 'has received response: expected template cannot be empty' )

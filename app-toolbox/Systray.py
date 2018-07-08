@@ -78,7 +78,7 @@ __END__="2018"
 # date and time of the buid
 __BUILDTIME__="11/06/2018 07:52:49"
 # Redirect stdout and stderr to log file only on production
-REDIRECT_STD=True
+REDIRECT_STD=False
 
 import ReleaseNotes as RN
 import time

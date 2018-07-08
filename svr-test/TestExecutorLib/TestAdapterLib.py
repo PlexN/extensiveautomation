@@ -97,6 +97,32 @@ def caller():
     """
     return  inspect.getouterframes(inspect.currentframe())[1][1:4]
     
+def check_timeout(timeout, caller):
+    """
+    """
+    timeout_valid = False
+    if isinstance(timeout, int):
+        timeout_valid = True
+    if isinstance(timeout, float) :
+        timeout_valid = True
+    if isinstance(timeout, bool):
+        timeout_valid = False
+    if not timeout_valid:
+        raise ValueException(caller, "timeout argument is not a float or integer (%s)" % type(timeout) )
+
+def check_agent(caller, agent, agent_support, agent_type):
+    """
+    """
+    if agent_support and agent is None:
+        raise ValueException(caller, "agent support activated, but no agent provided!" )
+    if agent_support:
+        if not isinstance(agent, dict) : 
+            raise ValueException(caller, "agent must be a dict (%s)" % type(agent) )
+        if not len(agent['name']): 
+            raise ValueException(caller, "agent name cannot be empty" )
+        if  agent['type'] != agent_type: 
+            raise ValueException(caller, 'Bad agent type: %s, expected: %s' % (agent['type'], agent_type)  )
+        
 class AdapterException(Exception):
     """
     """
@@ -327,8 +353,10 @@ class Adapter(threading.Thread):
     Adapter class
     """
     @doc_public
-    def __init__(self, parent, name, realname=None, debug=False, showEvts=True, showSentEvts=True, showRecvEvts=True, shared=False, 
-                            agentSupport=False, agent=None, timeoutSleep=0.05):
+    def __init__(self, parent, name, realname=None, debug=False, 
+                 showEvts=True, showSentEvts=True, showRecvEvts=True, shared=False, 
+                 agentSupport=False, agent=None, timeoutSleep=0.05, caller=None,
+                 agentType=None):
         """
         All adapters must inherent from this class
 
@@ -356,7 +384,9 @@ class Adapter(threading.Thread):
         if not isinstance(parent, TestExecutorLib.TestCase):
             raise TestAdaptersException( 'ERR_ADP_011: testcase expected but a bad type is passed for the parent: %s' % type(parent) )
         self.setFailed = parent.setFailed
-
+        
+        
+        
         threading.Thread.__init__(self)
         self.stopEvent = threading.Event()
         # queue for event 
@@ -365,6 +395,9 @@ class Adapter(threading.Thread):
         
         self.__agentSupport = agentSupport
         self.__agentName = agent
+        self.__agentType = agentType
+        self.__caller = caller
+        
         self.__adp_id__ = _getNewAdpId()
         self.__showEvts = showEvts
         self.__showSentEvts = showSentEvts
@@ -372,6 +405,13 @@ class Adapter(threading.Thread):
         self.debugMode = debug
         self.__timers = []
         self.__states = []
+        
+        # new in v19, checking the agent provided
+        check_agent(caller=self.__caller, 
+                    agent=self.__agentName, 
+                    agent_support=self.__agentSupport, 
+                    agent_type=self.__agentType)
+        # end of new
         
         self.NAME = self.__class__.__name__.upper()
         self.timerId = -1

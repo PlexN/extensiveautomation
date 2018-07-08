@@ -324,46 +324,74 @@ TEST_SUMMARY_TA = """
 """
 
 INPUT_CACHE = """
-	def cache(key):
-		return Cache().get(name=key)
-	TestProperties.cache = cache
+def cache(key):
+    return Cache().get(name=key)
+TestProperties.cache = cache
 """
 
 INPUT_CUSTOM = """
-	def custom(line):
-		cache = re.findall("\[!CACHE:[\w-]+(?:\:[\w-]+)*\:\]", line)
-		new_line = line
+def custom_text(line):
+    cache = re.findall("\[!CACHE:[\w-]+(?:\:[\w-]+)*\:\]", line)
+    new_line = line
 
-		for c in cache:
-			cache_args = c.split(":")[1:-1]
-			v = Cache().get(name=cache_args[0])
-			cache_args = cache_args[1:]
-			while len(cache_args):
-				if isinstance(v, dict):
-					v = v.get(cache_args[0])
-				cache_args = cache_args[1:]
-			new_line = new_line.replace(c, "%s" % v, 1)
+    for c in cache:
+        cache_args = c.split(":")[1:-1]
+        v = Cache().get(name=cache_args[0])
+        cache_args = cache_args[1:]
+        while len(cache_args):
+            if isinstance(v, dict):
+                v = v.get(cache_args[0])
+            cache_args = cache_args[1:]
+        new_line = new_line.replace(c, "%s" % v, 1)
 
-		inputs = re.findall("\[!INPUT:[\w-]+(?:\:[\w-]+)*\:\]", new_line)
-		for c in inputs:
-			input_args = c.split(":")[1:-1]
-			v = input(input_args[0])
-			i = 1
-			while isinstance(v, dict):
-				v = v[input_args[i]]
-				i=i+1   
-			new_line = new_line.replace(c, "%s" % v, 1)
-            
-		captures = re.findall("\[!CAPTURE:[\w-]+(?:\:.*?)?\:\]", new_line)
-		for c in captures:
-			sub = c[2:-2]
-			captures_args = sub.split(":", 2)[1:]
-			if len(captures_args) == 2:
-				new_line = new_line.replace(c, "(?P<%s>%s)" % (captures_args[0], captures_args[1]), 1)
-			else:
-				new_line = new_line.replace(c, "(?P<%s>.*)" % captures_args[0], 1)
-		return new_line
-	TestProperties.custom = custom
+    inputs = re.findall("\[!INPUT:[\w-]+(?:\:[\w-]+)*\:\]", new_line)
+    for c in inputs:
+        input_args = c.split(":")[1:-1]
+        v = input(input_args[0])
+        i = 1
+        while i<len(input_args):
+            if isinstance(v, dict):
+                v = v[input_args[i]]
+            i=i+1   
+        new_line = new_line.replace(c, "%s" % v, 1)
+
+    captures = re.findall("\[!CAPTURE:[\w-]+(?:\:.*?)??\:\]", new_line)
+    for c in captures:
+        sub = c[2:-2]
+        captures_args = sub.split(":", 2)[1:]
+        if len(captures_args) == 2:
+            new_line = new_line.replace(c, "(?P<%s>%s)" % (captures_args[0], captures_args[1]), 1)
+        else:
+            new_line = new_line.replace(c, "(?P<%s>.*)" % captures_args[0], 1)
+    return new_line
+def custom_json(line):
+    line = re.sub(r"#.*", "", line)
+    cache = re.findall("\[!CACHE:[\w-]+(?:\:[\w-]+)*\:\]", line)
+    new_line = line
+
+    for c in cache:
+        cache_args = c.split(":")[1:-1]
+        v = Cache().get(name=cache_args[0])
+        cache_args = cache_args[1:]
+        while len(cache_args):
+            if isinstance(v, dict):
+                v = v.get(cache_args[0])
+            cache_args = cache_args[1:]
+        new_line = new_line.replace(c, "%s" % v, 1)
+
+    inputs = re.findall("\[!INPUT:[\w-]+(?:\:[\w-]+)*\:\]", new_line)
+    for c in inputs:
+        input_args = c.split(":")[1:-1]
+        v = input(input_args[0])
+        i = 1
+        while isinstance(v, dict):
+            v = v[input_args[i]]
+            i=i+1   
+        new_line = new_line.replace(c, "%s" % v, 1)
+    new_line = re.sub(r"None", "null", new_line)
+    return new_line
+TestProperties.custom_text = custom_text
+TestProperties.custom_json = custom_json
 """
 
 

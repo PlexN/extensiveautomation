@@ -95,17 +95,12 @@ class File(TestAdapter.Adapter):
 		@param shared: shared adapter (default=False)
 		@type shared:	boolean
 		"""
-		# check the agent
-		if not isinstance(agent, dict) : 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "agent argument is not a dict (%s)" % type(agent) )
-		if not len(agent['name']): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "agent name cannot be empty" )
-		if  unicode(agent['type']) != unicode(AGENT_TYPE_EXPECTED): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), 'Bad agent type: %s, expected: %s' % (agent['type'], unicode(AGENT_TYPE_EXPECTED))  )
-		
 		# init adapter
-		TestAdapter.Adapter.__init__(self, name = __NAME__, parent = parent, debug=debug, realname=name, 
-																							agentSupport=True, agent=agent, shared=shared)
+		TestAdapter.Adapter.__init__(self, name = __NAME__, parent = parent, 
+																							debug=debug, realname=name, 
+																							agentSupport=True, agent=agent, shared=shared,
+																							caller=TestAdapter.caller(),
+																							agentType=AGENT_TYPE_EXPECTED)
 		self.codecX2D = Xml2Dict.Xml2Dict()
 		self.codecD2X = Dict2Xml.Dict2Xml(coding = None)
 		
@@ -907,8 +902,7 @@ class File(TestAdapter.Adapter):
 		@return: request id
 		@rtype: integer	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		if not len(path):
 			self.error("no path passed as argument")
@@ -939,8 +933,7 @@ class File(TestAdapter.Adapter):
 		@return: request id
 		@rtype: integer	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		if not len(path):
 			self.error("no path passed as argument")
@@ -1051,8 +1044,7 @@ class File(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		layer_file=templates.file(event='response', result=True, cmd=START_FOLLOW_FILE) 
 		evt = self.received( expected = self.encapsule(file_event=layer_file), timeout = timeout )
@@ -1086,8 +1078,7 @@ class File(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		layer_file=templates.file(event='response', result=True, cmd=STOP_FOLLOW_FILE) 
 		evt = self.received( expected = self.encapsule(file_event=layer_file), timeout = timeout )
@@ -1108,8 +1099,7 @@ class File(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		layer_file=templates.file(event='response', content=content, cmd=LOG_FILE) 
 		evt = self.received( expected = self.encapsule(file_event=layer_file), timeout = timeout )
@@ -1132,8 +1122,7 @@ class File(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		layer_file=templates.file(event='response', content=content, cmd=GET_FILE, requestId=requestId) 
 		evt = self.received( expected = self.encapsule(file_event=layer_file), timeout = timeout )
@@ -1156,8 +1145,7 @@ class File(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		layer_file=templates.file(event='response', modificationDate=modificationDate, 
 																						cmd=MODIFICATION_DATE_OF_FILE, requestId=requestId) 
@@ -1181,8 +1169,7 @@ class File(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		layer_file=templates.file(event='response', listFiles=listFiles, 
 																						cmd=LIST_FILES, requestId=requestId) 
@@ -1209,8 +1196,7 @@ class File(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		layer_file=templates.file(event='response', size=size, cmd=SIZE_OF_FILE, result=fileExists,  requestId=requestId) 
 		evt = self.received( expected = self.encapsule(file_event=layer_file), timeout = timeout )
@@ -1236,8 +1222,7 @@ class File(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		layer_file=templates.file(event='response', size=size, cmd=SIZE_OF_DIRECTORY,
 										result=folderExists,  requestId=requestId) 
@@ -1261,8 +1246,7 @@ class File(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		layer_file=templates.file(event='response', cmd=IS_LINK, result=isLink, requestId=requestId) 
 		evt = self.received( expected = self.encapsule(file_event=layer_file), timeout = timeout )
@@ -1285,8 +1269,7 @@ class File(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		layer_file=templates.file(event='response', cmd=IS_FILE, result=isFile, requestId=requestId) 
 		evt = self.received( expected = self.encapsule(file_event=layer_file), timeout = timeout )
@@ -1309,8 +1292,7 @@ class File(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		layer_file=templates.file(event='response', cmd=IS_DIRECTORY, result=isFolder, requestId=requestId ) 
 		evt = self.received( expected = self.encapsule(file_event=layer_file), timeout = timeout )
@@ -1333,8 +1315,7 @@ class File(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		layer_file=templates.file(event='response', cmd=WAIT_FILE, result=fileExists, requestId=requestId) 
 		evt = self.received( expected = self.encapsule(file_event=layer_file), timeout = timeout )
@@ -1357,8 +1338,7 @@ class File(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		layer_file=templates.file(event='response', cmd=WAIT_DIRECTORY, result=directoryExists, requestId=requestId) 
 		evt = self.received( expected = self.encapsule(file_event=layer_file), timeout = timeout )
@@ -1381,8 +1361,7 @@ class File(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		layer_file=templates.file(event='response', cmd=COMPARE_FILES, resultCompare=identical, requestId=requestId) 
 		evt = self.received( expected = self.encapsule(file_event=layer_file), timeout = timeout )
@@ -1405,8 +1384,7 @@ class File(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		layer_file=templates.file(event='response', cmd=EXISTS_FILE, result=fileExists, requestId=requestId) 
 		evt = self.received( expected = self.encapsule(file_event=layer_file), timeout = timeout )
@@ -1429,8 +1407,7 @@ class File(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		layer_file=templates.file(event='response', cmd=EXISTS_DIRECTORY, result=directoryExists, requestId=requestId) 
 		evt = self.received( expected = self.encapsule(file_event=layer_file), timeout = timeout )
@@ -1453,8 +1430,7 @@ class File(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		layer_file=templates.file(event='response', cmd=DELETE_FILE, result=fileDeleted, requestId=requestId) 
 		evt = self.received( expected = self.encapsule(file_event=layer_file), timeout = timeout )
@@ -1477,8 +1453,7 @@ class File(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		layer_file=templates.file(event='response', cmd=DELETE_DIRECTORY, result=directoryDeleted, requestId=requestId) 
 		evt = self.received( expected = self.encapsule(file_event=layer_file), timeout = timeout )
@@ -1502,8 +1477,7 @@ class File(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		layer_file=templates.file(event='response', cmd=COPY_DIRECTORY, result=directoryCopied, requestId=requestId) 
 		evt = self.received( expected = self.encapsule(file_event=layer_file), timeout = timeout )
@@ -1526,8 +1500,7 @@ class File(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		layer_file=templates.file(event='response', cmd=COPY_FILE, result=fileCopied, requestId=requestId) 
 		evt = self.received( expected = self.encapsule(file_event=layer_file), timeout = timeout )
@@ -1550,8 +1523,7 @@ class File(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		layer_file=templates.file(event='response', cmd=MOVE_FILE, result=fileMoved, requestId=requestId) 
 		evt = self.received( expected = self.encapsule(file_event=layer_file), timeout = timeout )
@@ -1574,8 +1546,7 @@ class File(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		layer_file=templates.file(event='response', cmd=MOVE_DIRECTORY, result=directoryMoved, requestId=requestId) 
 		evt = self.received( expected = self.encapsule(file_event=layer_file), timeout = timeout )
@@ -1601,8 +1572,7 @@ class File(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		layer_file=templates.file(event='response', cmd=CHECKSUM_FILE, checksum=checksum, 
 																											checksumType=checksumType, requestId=requestId ) 
@@ -1623,8 +1593,7 @@ class File(TestAdapter.Adapter):
 		@return: content file or False on error
 		@rtype: string/boolean		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		reqId = self.getFile(file=file)
 		evt = self.hasReceivedFile(timeout=timeout, requestId=reqId)
@@ -1649,8 +1618,7 @@ class File(TestAdapter.Adapter):
 		@return: True on match, False otherwise
 		@rtype: boolean		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapter.check_timeout(caller=TestAdapter.caller(), timeout=timeout)
 		
 		reqId = self.getFile(file=file)
 		evt = self.hasReceivedFile(timeout=timeout, content=stringExpected, requestId=reqId)

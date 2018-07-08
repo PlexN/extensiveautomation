@@ -180,18 +180,6 @@ class Client(TestAdapterLib.Adapter):
 		@param clientCiphers: ciphers client side (default=None)
 		@type clientCiphers: string/none
 		"""
-		# check agent
-		if agentSupport and agent is None:
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "Agent cannot be undefined!" )
-			
-		if agentSupport:
-			if not isinstance(agent, dict) : 
-				raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "agent argument is not a dict (%s)" % type(agent) )
-			if not len(agent['name']): 
-				raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "agent name cannot be empty" )
-			if  unicode(agent['type']) != unicode(AGENT_TYPE_EXPECTED): 
-				raise TestAdapterLib.ValueException(TestAdapterLib.caller(), 'Bad agent type: %s, expected: %s' % (agent['type'], unicode(AGENT_TYPE_EXPECTED))  )
-				
 		if not isinstance(bindPort, int):
 			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "bindPort argument is not a integer (%s)" % type(bindPort) )
 		if not isinstance(destinationPort, int):
@@ -201,8 +189,11 @@ class Client(TestAdapterLib.Adapter):
 		
 		# init adapter
 		TestAdapterLib.Adapter.__init__(self, name = __NAME__, parent = parent, debug=debug, 
-																			shared=shared, realname=name, agentSupport=agentSupport, agent=agent, showEvts=verbose, 
-																			showSentEvts=verbose, showRecvEvts=verbose)
+																									shared=shared, realname=name, agentSupport=agentSupport, 
+																									agent=agent, showEvts=verbose, 
+																									showSentEvts=verbose, showRecvEvts=verbose,
+																									caller=TestAdapterLib.caller(),
+																									agentType=AGENT_TYPE_EXPECTED)
 		if parentName is not None:
 			TestAdapterLib.Adapter.setName(self, name="%s>%s" % (parentName,__NAME__)  )
 		self.__mutex__ = threading.RLock()
@@ -681,8 +672,7 @@ class Client(TestAdapterLib.Adapter):
 		@return: connection result
 		@rtype: boolean
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		self.connect()
@@ -706,8 +696,7 @@ class Client(TestAdapterLib.Adapter):
 		@return: disconnection result
 		@rtype: boolean
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		self.disconnect()
@@ -1291,8 +1280,7 @@ class Client(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		defaultVer = "%s"  % self.cfg['sock-family']
 		if versionIp is not None:
@@ -1345,8 +1333,7 @@ class Client(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		# construct the expected template
 		tpl = templates.connected()
@@ -1383,8 +1370,7 @@ class Client(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		# construct the expected template
 		tpl = templates.connection_refused()
@@ -1421,8 +1407,7 @@ class Client(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		# construct the expected template
 		tpl = templates.connection_timeout()
@@ -1465,8 +1450,7 @@ class Client(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		# construct the expected template
 		tpl = templates.connection_failed(errno=errNo, errstr=errStr)
@@ -1509,8 +1493,7 @@ class Client(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		# construct the expected template
 		tpl = templates.received()
@@ -1549,8 +1532,7 @@ class Client(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		# construct the expected template
 		if byServer:
@@ -1600,8 +1582,7 @@ class Client(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		# construct the expected template
 		if self.cfg['ssl-support']:

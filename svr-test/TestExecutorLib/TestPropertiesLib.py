@@ -24,6 +24,7 @@
 import wrapt
 import sys
 import copy
+import re
 
 @wrapt.decorator
 def doc_public(wrapped, instance, args, kwargs):
@@ -496,30 +497,37 @@ def decodeParameter(parameter, sharedParameters=[]):
     elif parameter['type'] == "python":
         return parameter['value']
         
-    elif parameter['type'] == "shared":
+    elif parameter['type'] in [ "shared", "global" ]:
         return decodeShared(parameter=parameter, sharedParameters=sharedParameters)
 
-    elif parameter['type'] == "list-shared":
+    elif parameter['type'] in [ "list-shared", "list-global" ]:
         if len(parameter['value']):
             return decodeListShared(parameter=parameter, sharedParameters=sharedParameters)
         else:
             return []
             
-    elif parameter['type'] == "advanced":
-        j = {}
-        try:
-            j = json.loads(parameter['value'].encode("utf-8"))
-        except Exception as e:
-            raise TestPropertiesException( 'ERR_PRO_001: invalid advanced provided: %s' % str(e) )
-        return j
-        
     elif parameter['type'] == "json":
+        custom_tmp = custom_json(parameter['value'].encode("utf-8"))
         j = {}
         try:
-            j = json.loads(parameter['value'].encode("utf-8"))
+            j = json.loads(custom_tmp)
         except Exception as e:
             raise TestPropertiesException( 'ERR_PRO_001: invalid json provided: %s' % str(e) )
         return j
+        
+    elif parameter['type'] == "custom":
+        return custom_text(parameter['value'].encode("utf-8"))
+        
+    elif parameter['type'] == "text":
+        return custom_text(parameter['value'].encode("utf-8"))
+        
+    # elif parameter['type'] == "json":
+        # j = {}
+        # try:
+            # j = json.loads(parameter['value'].encode("utf-8"))
+        # except Exception as e:
+            # raise TestPropertiesException( 'ERR_PRO_001: invalid json provided: %s' % str(e) )
+        # return j
         
     elif parameter['type'] == "alias":
         return parameter['value'].encode("utf-8")
@@ -527,12 +535,9 @@ def decodeParameter(parameter, sharedParameters=[]):
     elif parameter['type'] == "str":
         return parameter['value'].encode("utf-8")
         
-    elif parameter['type'] == "text":
-        return parameter['value'].encode("utf-8")
-        
-    elif parameter['type'] == "custom":
-        return custom(parameter['value'].encode("utf-8"))
-        
+    # elif parameter['type'] == "text":
+        # return parameter['value'].encode("utf-8")
+
     elif parameter['type'] == "cache":
         return cache(parameter['value'].encode("utf-8"))
         
@@ -613,7 +618,7 @@ def decodeValue(parameter, value):
     if parameter['type'] == "none":
         return None
 
-    elif parameter['type'] == "shared":
+    elif parameter['type'] in [ "shared", "global" ]:
         if isinstance(value, dict): return value
         raise TestPropertiesException( 'ERR_PRO_XXX: bad value: %s' % value )
 
@@ -725,70 +730,26 @@ class Properties:
         new in v19
         """
         try:
-            # init all atruntime parameters
-            self.__search_atruntime_type(params_all=self.__parameters)
-            self.__search_atruntime_type(params_all=self.__parametersOut)
-            
-            # init the cache
             if cache is not None:
                 for p in self.__parameters:
-                    if p["scope"] == "cache":
-                        name_upper = p["name"].upper()
-                        if cache.get(name=name_upper) is None:
-                            cache.set(name=name_upper, data=decodeParameter(p))
+                    if p["scope"] == "cache" and cache.get(name=p["name"]) is None:
+                        tmp_v = decodeParameter(p)
+                        cache.set(name=p["name"], data=tmp_v)
+                        if p["type"] == "json" and isinstance(tmp_v, dict):
+                            for k,v in tmp_v.items():
+                                cache.set(name="%s_%s" % (p["name"], k), data=v)
+                            
                 for p in self.__parametersOut:
-                    if p["scope"] == "cache":
-                        name_upper = p["name"].upper()
-                        if cache.get(name=name_upper) is None:
-                            cache.set(name=p["name"].upper(), data=decodeParameter(p)) 
+                    if p["scope"] == "cache" and cache.get(name=name_upper) is None:
+                        tmp_v = decodeParameter(p)
+                        cache.set(name=p["name"], data=tmp_v)
+                        if p["type"] == "json" and isinstance(tmp_v, dict):
+                            for k,v in tmp_v.items():
+                                cache.set(name="%s_%s" % (p["name"], k), data=v)
+                            
         except Exception as e:
-            raise TestPropertiesException( 'ERR_PRO_100: bad advanced parameter provided - %s' % e )
-            
-    def __search_atruntime_type(self, params_all):
-        """
-        """
-        params = copy.deepcopy(params_all)
-        for p in params:
-            if p["type"] == "advanced":
-                params_all.extend( self.__init_atruntime_type(name=p["name"], 
-                                                             value=p["value"],
-                                                             scope=p["scope"],
-                                                             params_all=params_all) )
-        del params
-        
-    def __init_atruntime_type(self, name, value, scope, params_all):
-        """
-        """
-        new_params = [  ]
+            raise TestPropertiesException( 'ERR_PRO_100: bad json parameter provided - %s' % e )
 
-        if not isinstance(value, dict):
-            j = json.loads(value.encode("utf-8"))
-        else:
-            j = value
-            
-        if isinstance(j, dict):
-            for k,v in j.items():
-                val_name = "%s_%s" % (name, k.upper())
-
-                duplicated_name=False
-                for pr in params_all:
-                    if pr['name'] == val_name:
-                        duplicated_name = True
-                        break
-                        
-                if not duplicated_name:
-                    new_params.append( {"name": val_name, "value": v, "scope": scope,
-                                        "description": "", "type": "python" } )
-                                    
-                # if isinstance(v, dict):
-                    # new_params.extend( self.__init_atruntime_type( name=val_name, value=v )  )
-                # if isinstance(v, list):
-                    # for l in v:
-                        # if isinstance(l, dict):
-                            # new_params.extend( self.__init_atruntime_type( name=val_name, value=l )  ) 
-
-        return new_params
-        
     def readShared(self, shared):
         """
         @return: parameter value
@@ -1113,66 +1074,17 @@ class TestPlanParameters(object):
         """
         """
         try:
-            # init all atruntime parameters
-            self.__search_atruntime_type(param_id=param_id, params_all=params_all)
-            
-            # init the cache
             if self.__cache is not None:
                 for p in params_all[param_id]:
-                    if p["scope"] == "cache":
-                        name_upper = p["name"].upper()
-                        if self.__cache.get(name=name_upper) is None:
-                            self.__cache.set(name=name_upper, 
-                                             data=decodeParameter(p))
+                    if p["scope"] == "cache" and self.__cache.get(name=p["name"]) is None:
+                        tmp_v = decodeParameter(p, sharedParameters=self.__parametersShared)
+                        self.__cache.set(name=p["name"], data=tmp_v)
+                        if p["type"] == "json" and isinstance(tmp_v, dict):
+                            for k,v in tmp_v.items():
+                                self.__cache.set(name="%s_%s" % (p["name"], k), data=v)            
         except Exception as e:
-            raise TestPropertiesException( 'ERR_PRO_100: bad advanced parameter provided - %s' % e )
-            
-    def __search_atruntime_type(self, param_id, params_all):
-        """
-        """
-        params = copy.deepcopy(params_all[param_id])
-        for p in params:
-            if p["type"] == "advanced":
-                params_all[param_id].extend( self.__init_atruntime_type( name=p["name"], 
-                                                                        value=p["value"],
-                                                                        scope=p["scope"],
-                                                                        param_id=param_id,
-                                                                        params_all=params_all) )
-        del params
-        
-    def __init_atruntime_type(self, name, value, scope, param_id, params_all):
-        """
-        """
-        new_params = [  ]
+            raise TestPropertiesException( 'ERR_PRO_100: bad json parameter provided - %s' % e )
 
-        if not isinstance(value, dict):
-            j = json.loads(value.encode("utf-8"))
-        else:
-            j = value
-            
-        if isinstance(j, dict):
-            for k,v in j.items():
-                val_name = "%s_%s" % (name, k.upper())
-
-                duplicated_name=False
-                for pr in params_all[param_id]:
-                    if pr['name'] == val_name:
-                        duplicated_name = True
-                        break
-                        
-                if not duplicated_name:
-                    new_params.append( {"name": val_name, "value": v, "scope": scope,
-                                        "description": "", "type": "python" } )
-                                    
-                # if isinstance(v, dict):
-                    # new_params.extend( self.__init_atruntime_type( name=val_name, value=v )  )
-                # if isinstance(v, list):
-                    # for l in v:
-                        # if isinstance(l, dict):
-                            # new_params.extend( self.__init_atruntime_type( name=val_name, value=l )  ) 
-
-        return new_params
-        
     def getAgents(self):
         """
         Return agents
@@ -1728,7 +1640,8 @@ class TestPlanParameters(object):
         return None
 
 TPL = None
-custom = None
+custom_text = None
+custom_json = None
 cache = None
 
 def instance():

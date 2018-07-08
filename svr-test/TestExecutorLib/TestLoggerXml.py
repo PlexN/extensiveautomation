@@ -265,7 +265,9 @@ class TestLoggerXml:
         """
         Return the test info
         """
-        return { 'from': self.__user, 
+        return {
+                'from-src': TCI.instance().getLocalAddress(),
+                'from': self.__user, 
                 'task-id': self.taskId, 
                 'test-id': self.__id, 
                 'script_name': self.testname, 
@@ -273,7 +275,8 @@ class TestLoggerXml:
                 'uuid': self.testUuid,
                 'channel-id': self.__channelid, 
                 'test-replay-id': self.__replayid,
-                'task-uuid': self.taskUuid }
+                'task-uuid': self.taskUuid 
+                }
 
     def to_notif_json(self, value={}, testInfo={}):
         """

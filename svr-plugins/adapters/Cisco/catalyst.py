@@ -24,7 +24,7 @@
 import TestExecutorLib.TestValidatorsLib as TestValidators
 import TestExecutorLib.TestTemplatesLib as TestTemplates
 import TestExecutorLib.TestOperatorsLib as TestOperators
-import TestExecutorLib.TestAdapterLib as TestAdapter
+import TestExecutorLib.TestAdapterLib as TestAdapterLib
 from TestExecutorLib.TestExecutorLib import doc_public
 
 import sys
@@ -32,9 +32,9 @@ import sys
 from Libs.PyXmlDict import Xml2Dict
 from Libs.PyXmlDict import Dict2Xml
 
-AdapterIP = sys.modules['SutAdapters.%s.IPLITE' % TestAdapter.getVersion()]
-AdapterTCP = sys.modules['SutAdapters.%s.TCP' % TestAdapter.getVersion()]
-AdapterTelnet = sys.modules['SutAdapters.%s.Telnet' % TestAdapter.getVersion()]
+AdapterIP = sys.modules['SutAdapters.%s.IPLITE' % TestAdapterLib.getVersion()]
+AdapterTCP = sys.modules['SutAdapters.%s.TCP' % TestAdapterLib.getVersion()]
+AdapterTelnet = sys.modules['SutAdapters.%s.Telnet' % TestAdapterLib.getVersion()]
 
 __NAME__="""Catalyst"""
 
@@ -47,10 +47,12 @@ except ImportError: # python3 support
 
 import copy
 
-class Catalyst(TestAdapter.Adapter):
+class Catalyst(TestAdapterLib.Adapter):
 	@doc_public
-	def __init__(self, parent,  bindIp = '0.0.0.0', bindPort=0,  destIp='127.0.0.1', destPort=23,  name=None, debug=False,
-													shared=False, prompt='>', promptEnable='#', agent=None, agentSupport=False):
+	def __init__(self, parent,  bindIp = '0.0.0.0', bindPort=0,  destIp='127.0.0.1', 
+													destPort=23,  name=None, debug=False,
+													shared=False, prompt='>', promptEnable='#', 
+													agent=None, agentSupport=False):
 		"""
 		Adapter for catalyst switch cisco. Based on telnet.
 
@@ -82,11 +84,11 @@ class Catalyst(TestAdapter.Adapter):
 		@type prompt: string
 		"""
 		if not isinstance(bindPort, int):
-			raise TestAdapter.ValueException(TestAdapter.caller(), "bindPort argument is not a integer (%s)" % type(bindPort) )
+			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "bindPort argument is not a integer (%s)" % type(bindPort) )
 		if not isinstance(destPort, int):
-			raise TestAdapter.ValueException(TestAdapter.caller(), "destPort argument is not a integer (%s)" % type(destPort) )
+			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "destPort argument is not a integer (%s)" % type(destPort) )
 			
-		TestAdapter.Adapter.__init__(self, name = __NAME__, parent = parent, debug=debug, realname=name)
+		TestAdapterLib.Adapter.__init__(self, name = __NAME__, parent = parent, debug=debug, realname=name)
 		self.codecX2D = Xml2Dict.Xml2Dict()
 		self.codecD2X = Dict2Xml.Dict2Xml(coding = None)
 		self.cfg = {}
@@ -105,8 +107,10 @@ class Catalyst(TestAdapter.Adapter):
 		self.prompt = '>'
 		self.promptEnable = '#'
 		self.ADP_TRANSPORT = AdapterTelnet.Client(parent=parent, bindIp = bindIp, bindPort=bindPort, 
-																	destIp=destIp, destPort=destPort,  debug=debug, logEventSent=False, logEventReceived=False,
-																	parentName=__NAME__ , agent=agent, agentSupport=agentSupport)
+																																		destIp=destIp, destPort=destPort,  debug=debug, 
+																																		logEventSent=False, logEventReceived=False,
+																																		parentName=__NAME__ , agent=agent, 
+																																		agentSupport=agentSupport)
 		self.ADP_TRANSPORT.handleIncomingData = self.handleIncomingData		
 
 	def __checkConfig(self):	
@@ -148,8 +152,7 @@ class Catalyst(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.ADP_TRANSPORT.isConnected(timeout=timeout)
 		
@@ -164,8 +167,7 @@ class Catalyst(TestAdapter.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.ADP_TRANSPORT.isDisconnected(timeout=timeout)
 		
@@ -237,8 +239,7 @@ class Catalyst(TestAdapter.Adapter):
 		@return: response
 		@rtype: template	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		tpl = TestTemplates.TemplateMessage()
 		
@@ -272,8 +273,7 @@ class Catalyst(TestAdapter.Adapter):
 		@return: response
 		@rtype: template	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		tpl_expected= templates_catalyst.catalyst_data(data=data)
 		
@@ -308,8 +308,7 @@ class Catalyst(TestAdapter.Adapter):
 		@return: response
 		@rtype: template	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		tpl = templates_catalyst.catalyst_prompt_username()
 		return self.hasReceivedResponse( expected=tpl, timeout=timeout)
@@ -325,8 +324,7 @@ class Catalyst(TestAdapter.Adapter):
 		@return: response
 		@rtype: template	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		tpl = templates_catalyst.catalyst_prompt_password()
 		return self.hasReceivedResponse( expected=tpl, timeout=timeout)
@@ -342,8 +340,7 @@ class Catalyst(TestAdapter.Adapter):
 		@return: response
 		@rtype: template	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		tpl = templates_catalyst.catalyst_prompt()
 		return self.hasReceivedResponse( expected=tpl , timeout=timeout)
@@ -359,8 +356,7 @@ class Catalyst(TestAdapter.Adapter):
 		@return: response
 		@rtype: template	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		tpl = templates_catalyst.catalyst_prompt_enable()
 		return self.hasReceivedResponse( expected=tpl , timeout=timeout)
@@ -382,8 +378,7 @@ class Catalyst(TestAdapter.Adapter):
 		@return: True on success, False otherwise
 		@rtype: boolean
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = None
 		# username
@@ -418,8 +413,7 @@ class Catalyst(TestAdapter.Adapter):
 		@return: True on success, False otherwise
 		@rtype: boolean
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret  = None
 		tpl = templates_catalyst.catalyst_writemem(data="write mem")
@@ -446,8 +440,7 @@ class Catalyst(TestAdapter.Adapter):
 		@return: True on success, False otherwise
 		@rtype: boolean
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret  = None
 		tpl = templates_catalyst.catalyst_enable(data="enable")
@@ -477,8 +470,7 @@ class Catalyst(TestAdapter.Adapter):
 		@return: True on success, False otherwise
 		@rtype: boolean
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret  = None
 		tpl = templates_catalyst.catalyst_config(data="conf t")
@@ -501,8 +493,7 @@ class Catalyst(TestAdapter.Adapter):
 		@return: True on success, False otherwise
 		@rtype: boolean
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret  = None
 		tpl = templates_catalyst.catalyst_exit(data="exit")
@@ -525,8 +516,7 @@ class Catalyst(TestAdapter.Adapter):
 		@param timeout: time max to wait to receive event in second (default=1s)
 		@type timeout: float		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		tpl = templates_catalyst.catalyst_cmd(data=cmd)
 		self.sendCommand(tpl=tpl)

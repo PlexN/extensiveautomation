@@ -54,26 +54,17 @@ class Sniffer(TestAdapterLib.Adapter):
 								name=None):
 		"""
 		"""
-		# check agent
-		if agentSupport and agent is None:
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "Agent cannot be undefined!" )
-			
-		if agentSupport:
-			if not isinstance(agent, dict) : 
-				raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "agent argument is not a dict (%s)" % type(agent) )
-			if not len(agent['name']): 
-				raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "agent name cannot be empty" )
-			if  unicode(agent['type']) != unicode(AGENT_TYPE_EXPECTED): 
-				raise TestAdapterLib.ValueException(TestAdapterLib.caller(), 'Bad agent type: %s, expected: %s' % (agent['type'], unicode(AGENT_TYPE_EXPECTED))  )
-				
 		# init adapter		
 		if version == ICMPv4:
 			__NAME__ = __NAMEV4__
 		if version == ICMPv6:
 			__NAME__ = __NAMEV6__
 			
-		TestAdapterLib.Adapter.__init__(self, name = __NAME__, parent = parent, realname=name, debug=debug,
-																		shared=shared, agentSupport=agentSupport, agent=agent)
+		TestAdapterLib.Adapter.__init__(self, name = __NAME__, parent = parent, 
+																										realname=name, debug=debug,
+																										shared=shared, agentSupport=agentSupport, agent=agent,
+																										caller=TestAdapterLib.caller(),
+																										agentType=AGENT_TYPE_EXPECTED)
 		self.logEventSent = logEventSent
 		self.logEventReceived = logEventReceived
 		
@@ -192,17 +183,6 @@ class SnifferV4(Sniffer):
 		@param shared: shared adapter (default=False)
 		@type shared:	boolean		
 		"""
-		# check agent
-		if agentSupport and agent is None:
-			raise Exception('Agent cannot be undefined!')	
-		if agentSupport:
-			if not isinstance(agent, dict):
-				raise Exception('Bad value passed on agent!')			
-			if not len(agent['name']):
-				raise Exception('Agent name cannot be empty!')	
-			if unicode(agent['type']) != unicode(AGENT_TYPE_EXPECTED):
-				raise Exception('Bad agent type: %s, expected: %s' % (agent['type'], unicode(AGENT_TYPE_EXPECTED)) )	
-		
 		# init adapter
 		Sniffer.__init__(self, parent=parent, debug=debug, lowerIpVersion=lowerIpVersion, errorsOnly=errorsOnly,
 										logEventSent=logEventSent, logEventReceived=logEventSent , agentSupport=agentSupport, 
@@ -250,8 +230,7 @@ class SnifferV4(Sniffer):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage	
 		"""	
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return Sniffer.isSniffing(self, timeout=timeout)
 		
@@ -266,8 +245,7 @@ class SnifferV4(Sniffer):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""	
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return Sniffer.isStopped(self, timeout=timeout)
 		
@@ -385,8 +363,7 @@ class SnifferV4(Sniffer):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		expected = TestTemplatesLib.TemplateMessage()
 		
@@ -446,8 +423,7 @@ class SnifferV4(Sniffer):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		if self.cfg['listen-errors-only']:
 			self.debug('listen errors only activated')
@@ -526,8 +502,7 @@ class SnifferV4(Sniffer):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		if self.cfg['listen-errors-only']:
 			self.debug('listen errors only activated')
@@ -612,8 +587,7 @@ class SnifferV4(Sniffer):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		if self.cfg['listen-errors-only']:
 			self.debug('listen errors only activated')
@@ -702,8 +676,7 @@ class SnifferV4(Sniffer):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		if self.cfg['listen-errors-only']:
 			self.debug('listen errors only activated')

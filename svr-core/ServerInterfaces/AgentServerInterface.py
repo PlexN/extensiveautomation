@@ -176,20 +176,6 @@ class AgentServerInterface(Logger.ClassLogger, NetLayerLib.ServerAgent):
         self.__mutexNotif.acquire()
         try:
             self.tsi.notify(client=request["from-src"], data=request)
-
-            # clientAddr = None
-            # for testClient, testContext in self.tsi.testsConnected.items():
-                # if 'task-id' not in request:
-                    # raise Exception('task id missing: %s' % request)
-                # if 'task-id' not in testContext:
-                    # raise Exception('task id not present in test; connected but not yet ready ?: %s' % testContext)
-                # if testContext['task-id'] == request['task-id']:
-                    # clientAddr=testClient
-                    # break
-            # if clientAddr is not None:
-                # self.trace("sending notify through tsi to %s" % str(clientAddr) )
-                # self.tsi.notify(client=clientAddr, data=request)
-                # clientAddr = None
         except Exception as e:
             self.error( 'unable to handle notify: %s' % str(e) )
         self.__mutexNotif.release()

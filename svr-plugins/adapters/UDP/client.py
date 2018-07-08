@@ -110,18 +110,6 @@ class Client(TestAdapterLib.Adapter):
 		@param shared: shared adapter (default=False)
 		@type shared:	boolean
 		"""
-		# check agent
-		if agentSupport and agent is None:
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "Agent cannot be undefined!" )
-
-		if agentSupport:	
-			if not isinstance(agent, dict) : 
-				raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "agent argument is not a dict (%s)" % type(agent) )
-			if not len(agent['name']): 
-				raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "agent name cannot be empty" )
-			if  unicode(agent['type']) != unicode(AGENT_TYPE_EXPECTED): 
-				raise TestAdapterLib.ValueException(TestAdapterLib.caller(), 'Bad agent type: %s, expected: %s' % (agent['type'], unicode(AGENT_TYPE_EXPECTED))  )
-				
 		if not isinstance(bindPort, int):
 			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "bindPort argument is not a integer (%s)" % type(bindPort) )
 		if not isinstance(destinationPort, int):
@@ -129,7 +117,9 @@ class Client(TestAdapterLib.Adapter):
 			
 		# init adapter
 		TestAdapterLib.Adapter.__init__(self, name = __NAME__, parent = parent, debug=debug, shared=shared, 
-																realname=name, agentSupport=agentSupport, agent=agent)
+																									realname=name, agentSupport=agentSupport, agent=agent,
+																									caller=TestAdapterLib.caller(),
+																									agentType=AGENT_TYPE_EXPECTED)
 		if parentName is not None:
 			TestAdapterLib.Adapter.setName(self, name="%s>%s" % (parentName,__NAME__) )
 		self.__mutex__ = threading.RLock()
@@ -143,7 +133,8 @@ class Client(TestAdapterLib.Adapter):
 		self.islistening = False
 		self.buf = {}
 		
-		self.dns = AdapterDNS.Client(parent=parent, debug=debug, logEventSent=True, logEventReceived=True, name=name, shared=shared)
+		self.dns = AdapterDNS.Client(parent=parent, debug=debug, logEventSent=True,
+																						logEventReceived=True, name=name, shared=shared)
 																
 		self.cfg = {}
 		# transport options
@@ -165,15 +156,17 @@ class Client(TestAdapterLib.Adapter):
 			self.cfg['agent'] = agent
 			self.cfg['agent-name'] = agent['name']
 			
-		self.TIMER_ALIVE_AGT = TestAdapterLib.Timer(parent=self, duration=20, name="keepalive-agent", callback=self.aliveAgent,
-																																logEvent=False, enabled=True)
+		self.TIMER_ALIVE_AGT = TestAdapterLib.Timer(parent=self, duration=20, 
+																																				name="keepalive-agent", 
+																																				callback=self.aliveAgent,
+																																				logEvent=False, 
+																																				enabled=True)
 		self.__checkConfig()
 		
 		if agentSupport:
 			self.prepareAgent(data={'shared': shared})
 			if self.agentIsReady(timeout=10) is None:
 				raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "Agent %s is not ready" % self.cfg['agent-name'] )
-#				raise Exception("Agent %s is not ready" % self.cfg['agent-name'] )
 			self.TIMER_ALIVE_AGT.start()
 			
 	def __checkConfig(self):
@@ -360,27 +353,37 @@ class Client(TestAdapterLib.Adapter):
 	def sendNotifyToAgent(self, data):
 		"""
 		"""
-		self.parent.sendNotifyToAgent(adapterId=self.getAdapterId(), agentName=self.cfg['agent-name'], agentData=data)
+		self.parent.sendNotifyToAgent(adapterId=self.getAdapterId(), 
+																								agentName=self.cfg['agent-name'], 
+																								agentData=data)
 	def prepareAgent(self, data):
 		"""
 		prepare agent
 		"""
-		self.parent.sendReadyToAgent(adapterId=self.getAdapterId(), agentName=self.cfg['agent-name'], agentData=data)
+		self.parent.sendReadyToAgent(adapterId=self.getAdapterId(), 
+																								agentName=self.cfg['agent-name'], 
+																								agentData=data)
 	def initAgent(self, data):
 		"""
 		Init agent
 		"""
-		self.parent.sendInitToAgent(adapterId=self.getAdapterId(), agentName=self.cfg['agent-name'], agentData=data)
+		self.parent.sendInitToAgent(adapterId=self.getAdapterId(), 
+																						agentName=self.cfg['agent-name'], 
+																						agentData=data)
 	def resetAgent(self):
 		"""
 		Reset agent
 		"""
-		self.parent.sendResetToAgent(adapterId=self.getAdapterId(), agentName=self.cfg['agent-name'], agentData='')
+		self.parent.sendResetToAgent(adapterId=self.getAdapterId(), 
+																								agentName=self.cfg['agent-name'], 
+																								agentData='')
 	def aliveAgent(self):
 		"""
 		Keep alive agent
 		"""
-		self.parent.sendAliveToAgent(adapterId=self.getAdapterId(), agentName=self.cfg['agent-name'], agentData='')
+		self.parent.sendAliveToAgent(adapterId=self.getAdapterId(), 
+																							agentName=self.cfg['agent-name'], 
+																							agentData='')
 		self.TIMER_ALIVE_AGT.restart()
 	def agentIsReady(self, timeout=1.0):
 		"""
@@ -429,7 +432,6 @@ class Client(TestAdapterLib.Adapter):
 				'sock-family': self.cfg['sock-family'],
 				'dst-ip': self.cfg['dst-ip'], 'dst-port':self.cfg['dst-port'],
 			}
-			#self.parent.sendInitToAgent(adapterId=self.getAdapterId(), agentName=self.cfg['agent-name'], agentData=remote_cfg)
 			self.sendNotifyToAgent(data=remote_cfg)
 			
 			# start thread
@@ -699,7 +701,8 @@ class Client(TestAdapterLib.Adapter):
 		tpl = self.encapsule( ip_event=AdapterIP.received(), udp_event=templates.listening_failed() )
 		self.logRecvEvent( shortEvt = "listening failed", tplEvt = tpl )
 
-	def getExpectedTemplate(self, tpl, versionIp=None, sourceIp=None, destinationIp=None, sourcePort=None, destinationPort=None):
+	def getExpectedTemplate(self, tpl, versionIp=None, sourceIp=None, destinationIp=None, 
+																					sourcePort=None, destinationPort=None):
 		"""
 		Return an expected template with ip and udp layers
 		"""
@@ -751,12 +754,16 @@ class Client(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		# construct the expected template
 		tpl = templates.listening()
-		expected = self.getExpectedTemplate(tpl=tpl, versionIp=versionIp, sourceIp=sourceIp, destinationIp=destinationIp, sourcePort=sourcePort, destinationPort=destinationPort)
+		expected = self.getExpectedTemplate(tpl=tpl, 
+																													versionIp=versionIp, 
+																													sourceIp=sourceIp, 
+																													destinationIp=destinationIp, 
+																													sourcePort=sourcePort, 
+																													destinationPort=destinationPort)
 		
 		# try to match the template 
 		evt = self.received( expected=expected, timeout=timeout )
@@ -789,12 +796,16 @@ class Client(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		# construct the expected template
 		tpl = templates.listening_failed()
-		expected = self.getExpectedTemplate(tpl=tpl, versionIp=versionIp, sourceIp=sourceIp, destinationIp=destinationIp, sourcePort=sourcePort, destinationPort=destinationPort)
+		expected = self.getExpectedTemplate(tpl=tpl, 
+																													versionIp=versionIp, 
+																													sourceIp=sourceIp, 
+																													destinationIp=destinationIp, 
+																													sourcePort=sourcePort, 
+																													destinationPort=destinationPort)
 		
 		# try to match the template 
 		evt = self.received( expected=expected, timeout=timeout )
@@ -827,12 +838,16 @@ class Client(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		# construct the expected template
 		tpl = templates.stopped()
-		expected = self.getExpectedTemplate(tpl=tpl, versionIp=versionIp, sourceIp=sourceIp, destinationIp=destinationIp, sourcePort=sourcePort, destinationPort=destinationPort)
+		expected = self.getExpectedTemplate(tpl=tpl, 
+																													versionIp=versionIp, 
+																													sourceIp=sourceIp, 
+																													destinationIp=destinationIp, 
+																													sourcePort=sourcePort, 
+																													destinationPort=destinationPort)
 		
 		# try to match the template 
 		evt = self.received( expected=expected, timeout=timeout )
@@ -868,13 +883,16 @@ class Client(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		# construct the expected template
 		tpl = templates.received(data=data)
-		expected = self.getExpectedTemplate(tpl=tpl, versionIp=versionIp, sourceIp=sourceIp, destinationIp=destinationIp, 
-																				sourcePort=sourcePort, destinationPort=destinationPort)
+		expected = self.getExpectedTemplate(tpl=tpl, 
+																													versionIp=versionIp, 
+																													sourceIp=sourceIp, 
+																													destinationIp=destinationIp, 
+																													sourcePort=sourcePort, 
+																													destinationPort=destinationPort)
 		
 		# try to match the template 			
 		evt = self.received( expected = expected, timeout = timeout )

@@ -179,17 +179,12 @@ class Sikuli(TestAdapterLib.Adapter):
 		@param debug: active debug mode (default=False)
 		@type debug:	boolean
 		"""
-		if not isinstance(agent, dict) : 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "agent argument is not a dict (%s)" % type(agent) )
-		if not len(agent['name']): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "agent name cannot be empty" )
-		if  unicode(agent['type']) != unicode(AGENT_TYPE_EXPECTED): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), 'Bad agent type: %s, expected: %s' % (agent['type'], unicode(AGENT_TYPE_EXPECTED))  )
-	
 		# init adapter
 		TestAdapterLib.Adapter.__init__(self, name = __NAME__, parent = parent, debug=debug, 
-																				realname=name, agentSupport=True, agent=agent, shared=shared,
-																				showEvts=verbose, showSentEvts=verbose, showRecvEvts=verbose)
+																										realname=name, agentSupport=True, agent=agent, shared=shared,
+																										showEvts=verbose, showSentEvts=verbose, showRecvEvts=verbose,
+																										caller=TestAdapterLib.caller(),
+																										agentType=AGENT_TYPE_EXPECTED)
 		self.parent = parent
 		self.codecX2D = Xml2Dict.Xml2Dict()
 		self.codecD2X = Dict2Xml.Dict2Xml(coding = None)
@@ -832,8 +827,7 @@ class Sikuli(TestAdapterLib.Adapter):
 		@return: action id
 		@rtype: string	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		action =  ACTION_WAIT_IMAGE
 		actionId = self.getActionId()
@@ -900,8 +894,7 @@ class Sikuli(TestAdapterLib.Adapter):
 		@return: action id
 		@rtype: string	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		action =  ACTION_WAIT_CLICK_IMAGE
 		actionId = self.getActionId()
@@ -2115,8 +2108,7 @@ class Sikuli(TestAdapterLib.Adapter):
 		@return: an event matching with the template ornone otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		# construct the expected template
 		expected = self.encapsule(layer_gui=templates.gui(action=ACTION_SCREENSHOT, actionId=actionId))
@@ -2139,8 +2131,7 @@ class Sikuli(TestAdapterLib.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		# construct the expected template
 		expected = self.encapsule(layer_gui=templates.gui(action=ACTION_GET_TEXT, actionId=actionId))
@@ -2162,8 +2153,7 @@ class Sikuli(TestAdapterLib.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		# construct the expected template
 		expected = self.encapsule(layer_gui=templates.gui(action=ACTION_COUNT_IMAGE, actionId=actionId))
@@ -2188,8 +2178,7 @@ class Sikuli(TestAdapterLib.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		# construct the expected template
 		expected = self.encapsule(layer_gui=templates.gui(action=actionName, actionId=actionId, result=ACTION_OK ))
@@ -2217,8 +2206,7 @@ class Sikuli(TestAdapterLib.Adapter):
 		@return: True if click is OK, false otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		actionId = self.waitImage(img=image, description='unknown', similar=similar, mainImg=region, timeout=timeout)
 		actionRet = self.isActionAccepted(timeout=timeout, actionName=ACTION_WAIT_IMAGE, actionId=actionId)
@@ -2249,8 +2237,7 @@ class Sikuli(TestAdapterLib.Adapter):
 		@return: True if click is OK, false otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		actionId = self.waitClickImage(img=image, description='unknown', similar=similar, mainImg=region, timeout=timeout)
 		actionRet = self.isActionAccepted(timeout=timeout, actionName=ACTION_WAIT_CLICK_IMAGE, actionId=actionId)
@@ -2278,8 +2265,7 @@ class Sikuli(TestAdapterLib.Adapter):
 		@return: True if click is OK, false otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		actionId = self.findImage(img=image, description='unknown', similar=similar, mainImg=region)
 		actionRet = self.isActionAccepted(timeout=timeout, actionName=ACTION_FIND_IMAGE, actionId=actionId)
@@ -2311,8 +2297,7 @@ class Sikuli(TestAdapterLib.Adapter):
 		@return: True if click is OK, false otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		actionId = self.findClickImage(img=image, description='unknown', similar=similar, mainImg=region)
 		actionRet = self.isActionAccepted(timeout=timeout, actionName=ACTION_FIND_CLICK_IMAGE, actionId=actionId)
@@ -2344,8 +2329,7 @@ class Sikuli(TestAdapterLib.Adapter):
 		@return: True if click is OK, false otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		actionId = self.clickImage(img=image, description='unknown', similar=similar, mainImg=region, findAll=onAll)
 		actionRet = self.isActionAccepted(timeout=timeout, actionName=ACTION_CLICK_IMAGE, actionId=actionId)
@@ -2376,8 +2360,7 @@ class Sikuli(TestAdapterLib.Adapter):
 		@return: True if click is OK, false otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		actionId = self.doubleClickImage(img=image, description='unknown', similar=similar, mainImg=region, findAll=onAll)
 		actionRet = self.isActionAccepted(timeout=timeout, actionName=ACTION_DOUBLE_CLICK_IMAGE, actionId=actionId)
@@ -2408,8 +2391,7 @@ class Sikuli(TestAdapterLib.Adapter):
 		@return: True if click is OK, false otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		actionId = self.rightClickImage(img=image, description='unknown', similar=similar, mainImg=region, findAll=onAll)
 		actionRet = self.isActionAccepted(timeout=timeout, actionName=ACTION_RIGHT_CLICK_IMAGE, actionId=actionId)
@@ -2444,8 +2426,7 @@ class Sikuli(TestAdapterLib.Adapter):
 		@return: True if click is OK, false otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		actionId = self.clickWord(word=word, locX=locX, locY=locY, locW=locW, locH=locH)
 		actionRet = self.isActionAccepted(timeout=timeout, actionName=ACTION_CLICK_WORD, actionId=actionId)
@@ -2480,8 +2461,7 @@ class Sikuli(TestAdapterLib.Adapter):
 		@return: True if click is OK, false otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		actionId = self.doubleClickWord(word=word, locX=locX, locY=locY, locW=locW, locH=locH)
 		actionRet = self.isActionAccepted(timeout=timeout, actionName=ACTION_DOUBLE_CLICK_WORD, actionId=actionId)
@@ -2513,8 +2493,7 @@ class Sikuli(TestAdapterLib.Adapter):
 		@return: True if click is OK, false otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		actionId = self.rightClickWord(word=word, locX=locX, locY=locY, locW=locW, locH=locH)
 		actionRet = self.isActionAccepted(timeout=timeout, actionName=ACTION_RIGHT_CLICK_WORD, actionId=actionId)
@@ -2549,8 +2528,7 @@ class Sikuli(TestAdapterLib.Adapter):
 		@return: True if click is OK, false otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		actionId = self.waitWord(word=word, locX=locX, locY=locY, locW=locW, locH=locH, description='unknown',  timeout=timeout)
 		actionRet = self.isActionAccepted(timeout=timeout, actionName=ACTION_WAIT_WORD, actionId=actionId)
@@ -2588,8 +2566,7 @@ class Sikuli(TestAdapterLib.Adapter):
 		@return: True if click is OK, false otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		actionId = self.waitClickWord(word=word, locX=locX, locY=locY, locW=locW, locH=locH, timeout=timeout)
 		actionRet = self.isActionAccepted(timeout=timeout, actionName=ACTION_WAIT_CLICK_WORD, actionId=actionId)
@@ -2608,8 +2585,7 @@ class Sikuli(TestAdapterLib.Adapter):
 		@return: True if click is OK, false otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		actionId = self.takeScreenshot()
 		actionRet = self.hasReceivedScreenshot(timeout=timeout, actionId=actionId)
@@ -2637,8 +2613,7 @@ class Sikuli(TestAdapterLib.Adapter):
 		@return: True on action OK, False otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		actionId = self.typeText(text=text, keys=keys, keysModifiers=keysModifiers, img=image, description='unknown', similar=similar)
 		actionRet = self.isActionAccepted(timeout=timeout, actionName=ACTION_TYPE_TEXT, actionId=actionId)
@@ -2670,8 +2645,7 @@ class Sikuli(TestAdapterLib.Adapter):
 		@return: True on action OK, False otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		actionId = self.typeShorcut(key=key, modifier=modifier, special=special, other=other)
 		actionRet = self.isActionAccepted(timeout=timeout, actionName=ACTION_TYPE_SHORTCUT, actionId=actionId)
@@ -2699,8 +2673,7 @@ class Sikuli(TestAdapterLib.Adapter):
 		@return: True if click is OK, false otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		actionId = self.hoverImage(img=image, description='unknown', similar=similar, mainImg=region)
 		actionRet = self.isActionAccepted(timeout=timeout, actionName=ACTION_HOVER_IMAGE, actionId=actionId)
@@ -2728,8 +2701,7 @@ class Sikuli(TestAdapterLib.Adapter):
 		@return: True if click is OK, false otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		actionId = self.countImage(img=image, description='unknown', similar=similar, mainImg=region)
 		actionRet = self.isActionAccepted(timeout=timeout, actionName=ACTION_COUNT_IMAGE, actionId=actionId)
@@ -2763,8 +2735,7 @@ class Sikuli(TestAdapterLib.Adapter):
 		@return: True if click is OK, false otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		actionId = self.countWord(word=word, locX=locX, locY=locY, locW=locW, locH=locH, description='unknown')
 		actionRet = self.isActionAccepted(timeout=timeout, actionName=ACTION_COUNT_WORD, actionId=actionId)
@@ -2783,8 +2754,7 @@ class Sikuli(TestAdapterLib.Adapter):
 		@return: True if click is OK, false otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		actionId = self.getTextClipboard(description='unknown')
 		actionRet = self.isActionAccepted(timeout=timeout, actionName=ACTION_GET_CLIPBOARD, actionId=actionId)
@@ -2818,8 +2788,7 @@ class Sikuli(TestAdapterLib.Adapter):
 		@return: True if click is OK, false otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		actionId = self.dragDropImage(img=image, description='unknown', toY=toY, toX=toX, 
 																								similar=similar, mainImg=region)

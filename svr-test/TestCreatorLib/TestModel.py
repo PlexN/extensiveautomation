@@ -355,6 +355,8 @@ try:
 	def description(name):
 		return ParametersHandler.description(name=name, tpId=TLX.instance().mainScriptId, tsId=TLX.instance().scriptId)
 """)
+    te.append(TestModelCommon.INPUT_CUSTOM)
+    te.append(TestModelCommon.INPUT_CACHE)
     te.append( TestModelCommon.TEST_SUMMARY )
     te.append( TestModelCommon.TEST_SUMMARY_TG ) 
     for ds in missingDataset:
@@ -911,8 +913,43 @@ tcMgr = TestExecutorLib.getTcMgr()
 tsMgr.initialize(path=result_path, testname=test_name, replayId=replay_id, userId=userid_, projectId=projectid_, 
                 stepByStep=%s, breakpoint=%s, testId=%s, relativePath=test_result_path, 
                 testpath=test_location, userName=user_, projectName=projectname_)""" % (stepByStep,breakpoint,testId))
+                
     te.append( """
 TestProperties.instance().initAtRunTime(cache=Cache())
+def shared(project, name, subname=''):
+    return ParametersHandler.shared(project=project, name=name, subname=subname)
+def input(name):
+    return ParametersHandler.parameter(name=name, tpId=TLX.instance().mainScriptId, tsId=TLX.instance().scriptId)
+def output(name):
+    return ParametersHandler.parameterOut(name=name, tpId=TLX.instance().mainScriptId, tsId=TLX.instance().scriptId)
+def setInput(name, value):
+    return ParametersHandler.setParameter(name=name, value=value, tpId=TLX.instance().mainScriptId, tsId=TLX.instance().scriptId)
+def setOutput(name, value):
+    return ParametersHandler.setParameterOut(name=name, value=value, tpId=TLX.instance().mainScriptId, tsId=TLX.instance().scriptId)
+def agent(name):
+    return ParametersHandler.agent(name=name, tpId=TLX.instance().mainScriptId, tsId=TLX.instance().scriptId)
+def running(name):
+    return ParametersHandler.running(name=name)
+def excel(data, worksheet, row=None, column=None):
+    return ParametersHandler.excel(data=data, worksheet=worksheet, row=row, column=column)
+
+get = parameter = input # backward compatibility
+def inputs():
+    return ParametersHandler.inputs(tpId=TLX.instance().mainScriptId, tsId=TLX.instance().scriptId)
+def outputs():
+    return ParametersHandler.outputs(tpId=TLX.instance().mainScriptId, tsId=TLX.instance().scriptId)
+def agents():
+    return ParametersHandler.agents(tpId=TLX.instance().mainScriptId, tsId=TLX.instance().scriptId)
+def descriptions():
+    return ParametersHandler.descriptions(tpId=TLX.instance().mainScriptId, tsId=TLX.instance().scriptId)
+    
+def description(name):
+    return ParametersHandler.description(name=name, tpId=TLX.instance().mainScriptId, tsId=TLX.instance().scriptId)
+""")
+    te.append(TestModelCommon.INPUT_CUSTOM)
+    te.append(TestModelCommon.INPUT_CACHE)
+    
+    te.append( """
 ParametersHandler.addParameters( parametersId=TLX.instance().mainScriptId, parameters=%s)\n""" % parameters )
     te.append( """ParametersHandler.addParametersOut( parametersId=TLX.instance().mainScriptId, parameters=%s)\n""" % parametersOut )
     te.append( """ParametersHandler.addAgents( agentsId=TLX.instance().mainScriptId, agents=%s)\n""" % agents )
@@ -940,37 +977,6 @@ try:
 """)
     te.append( TestModelCommon.CODE_PROBES ) 
     te.append( """	__PROBES__ = %s""" % probes )
-    te.append( """
-	def shared(project, name, subname=''):
-		return ParametersHandler.shared(project=project, name=name, subname=subname)
-	def input(name):
-		return ParametersHandler.parameter(name=name, tpId=TLX.instance().mainScriptId, tsId=TLX.instance().scriptId)
-	def output(name):
-		return ParametersHandler.parameterOut(name=name, tpId=TLX.instance().mainScriptId, tsId=TLX.instance().scriptId)
-	def setInput(name, value):
-		return ParametersHandler.setParameter(name=name, value=value, tpId=TLX.instance().mainScriptId, tsId=TLX.instance().scriptId)
-	def setOutput(name, value):
-		return ParametersHandler.setParameterOut(name=name, value=value, tpId=TLX.instance().mainScriptId, tsId=TLX.instance().scriptId)
-	def agent(name):
-		return ParametersHandler.agent(name=name, tpId=TLX.instance().mainScriptId, tsId=TLX.instance().scriptId)
-	def running(name):
-		return ParametersHandler.running(name=name)
-	def excel(data, worksheet, row=None, column=None):
-		return ParametersHandler.excel(data=data, worksheet=worksheet, row=row, column=column)
- 
-	get = parameter = input # backward compatibility
-	def inputs():
-		return ParametersHandler.inputs(tpId=TLX.instance().mainScriptId, tsId=TLX.instance().scriptId)
-	def outputs():
-		return ParametersHandler.outputs(tpId=TLX.instance().mainScriptId, tsId=TLX.instance().scriptId)
-	def agents():
-		return ParametersHandler.agents(tpId=TLX.instance().mainScriptId, tsId=TLX.instance().scriptId)
-	def descriptions():
-		return ParametersHandler.descriptions(tpId=TLX.instance().mainScriptId, tsId=TLX.instance().scriptId)
-        
-	def description(name):
-		return ParametersHandler.description(name=name, tpId=TLX.instance().mainScriptId, tsId=TLX.instance().scriptId)
-""")
 
     te.append( TestModelCommon.TEST_SUMMARY )
     te.append( TestModelCommon.TEST_SUMMARY_TP ) 
@@ -1532,6 +1538,11 @@ try:
 		return TestProperties.Descriptions().get(name=name)
 	
 """)
+    te.append( Common.indent(TestModelCommon.INPUT_CUSTOM) )
+    te.append( Common.indent(TestModelCommon.INPUT_CACHE) )
+    te.append(""" 
+	TestProperties.instance().initAtRunTime(cache=Cache())
+""")
     te.append( TestModelCommon.TEST_SUMMARY ) 
     te.append( TestModelCommon.TEST_SUMMARY_TS ) 
     for ds in missingDataset:
@@ -1814,7 +1825,6 @@ try:
     te.append( TestModelCommon.CODE_PROBES ) 
     te.append("""	__PROBES__ = %s""" % probes )
     te.append("""
-	TestProperties.instance().initAtRunTime(cache=Cache())
 	def shared(project, name, subname=''):
 		return TestProperties.Parameters().shared(project=project, name=name, subname=subname)
 	def input(name):
@@ -1844,6 +1854,11 @@ try:
 	def description(name):
 		return TestProperties.Descriptions().get(name=name)
 
+""")
+    te.append( Common.indent(TestModelCommon.INPUT_CUSTOM) )
+    te.append( Common.indent(TestModelCommon.INPUT_CACHE) )
+    te.append(""" 
+	TestProperties.instance().initAtRunTime(cache=Cache())
 """)
     te.append( TestModelCommon.TEST_SUMMARY ) 
     te.append( TestModelCommon.TEST_SUMMARY_TA ) 
@@ -2151,6 +2166,11 @@ try:
 	def description(name):
 		return TestProperties.Descriptions().get(name=name)
 	
+""")
+    te.append( Common.indent(code=TestModelCommon.INPUT_CUSTOM) )
+    te.append( Common.indent(TestModelCommon.INPUT_CACHE) )
+    te.append(""" 
+	TestProperties.instance().initAtRunTime(cache=Cache())
 """)
     te.append( TestModelCommon.TEST_SUMMARY ) 
     te.append( TestModelCommon.TEST_SUMMARY_TA ) 

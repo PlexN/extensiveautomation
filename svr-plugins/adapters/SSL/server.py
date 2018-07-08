@@ -114,7 +114,8 @@ class Server(TestAdapterLib.Adapter):
 		@param shared: shared adapter (default=False)
 		@type shared:	boolean
 		"""
-		TestAdapterLib.Adapter.__init__(self, name = __NAME__, parent = parent, debug=debug, shared=shared, realname=name)
+		TestAdapterLib.Adapter.__init__(self, name = __NAME__, parent = parent, 
+																									debug=debug, shared=shared, realname=name)
 		self.parent = parent
 		self.logEventSent = logEventSent
 		self.logEventReceived = logEventReceived

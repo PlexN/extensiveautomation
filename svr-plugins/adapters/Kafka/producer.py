@@ -77,27 +77,12 @@ class ProducerClient(TestAdapterLib.Adapter):
 		@param shared: shared adapter (default=False)
 		@type shared:	boolean
 		"""
-		# check agent
-		if agentSupport and agent is None:
-			msg_err = "Agent cannot be undefined!"
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err)	
-					
-		if agentSupport:
-			if not isinstance(agent, dict) :
-				msg_err = "agent argument is not a dict (%s)" % type(agent) 
-				raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err)
-			if not len(agent['name']):
-				msg_err = "agent name cannot be empty"
-				raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err)
-			if  unicode(agent['type']) != unicode(AGENT_TYPE_EXPECTED):
-				msg_err = 'Bad agent type: %s, expected: %s' % (agent['type'], unicode(AGENT_TYPE_EXPECTED))
-				raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err)
-		
-
 		TestAdapterLib.Adapter.__init__(self, name = __NAME__, parent = parent, 
 																									debug=debug, realname=name,
 																									agentSupport=agentSupport, 
-																									agent=agent, shared=shared)
+																									agent=agent, shared=shared,
+																									caller=TestAdapterLib.caller(),
+																									agentType=AGENT_TYPE_EXPECTED)
 		self.parent = parent
 		self.codecX2D = Xml2Dict.Xml2Dict()
 		self.codecD2X = Dict2Xml.Dict2Xml(coding = None)
@@ -482,9 +467,7 @@ class ProducerClient(TestAdapterLib.Adapter):
 		
 		@type offset:  RecordMetadata
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool):
-			msg_err = "timeout argument is not a float or integer (%s)" % type(timeout)
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		if record == None:
 			record = { "Topic":TestOperatorsLib.Any(), 
@@ -507,9 +490,7 @@ class ProducerClient(TestAdapterLib.Adapter):
 		@param timeout: time max to wait to receive event in second (default=2s)
 		@type timeout: float		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool):
-			msg_err = "timeout argument is not a float or integer (%s)" % type(timeout)
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		# construct the expected template
 		expected = templates.kafka_ops(method=CONNECT, bootstrap_servers=self.bootstrap_servers)
@@ -525,9 +506,7 @@ class ProducerClient(TestAdapterLib.Adapter):
 		@param timeout: time max to wait to receive event in second (default=2s)
 		@type timeout: float		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool):
-			msg_err = "timeout argument is not a float or integer (%s)" % type(timeout)
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		# construct the expected template
 		expected = templates.kafka_ops(method=FLUSH)
@@ -543,9 +522,7 @@ class ProducerClient(TestAdapterLib.Adapter):
 		@param timeout: time max to wait to receive event in second (default=2s)
 		@type timeout: float		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool):
-			msg_err = "timeout argument is not a float or integer (%s)" % type(timeout)
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		# construct the expected template
 		expected = templates.kafka_ops(method=CLOSE)
@@ -564,9 +541,7 @@ class ProducerClient(TestAdapterLib.Adapter):
 		@param offset: Optional list that we expect to be view by producer 
 		@type offset: list of of Topics
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			msg_err = "timeout argument is not a float or integer (%s)" % type(timeout)
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err)
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 
 		if partitions == None:
 			partitions= { "partitions":TestOperatorsLib.Any()}

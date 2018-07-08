@@ -61,8 +61,10 @@ class Client(TestAdapterLib.Adapter):
 		@param shared: shared adapter (default=False)
 		@type shared:	boolean
 		"""
-		TestAdapterLib.Adapter.__init__(self, name = __NAME__, parent = parent, debug=debug, shared=shared, realname=name,
-																											showEvts=verbose, showSentEvts=verbose, showRecvEvts=verbose)
+		TestAdapterLib.Adapter.__init__(self, name = __NAME__, parent = parent, debug=debug, 
+																									shared=shared, realname=name,
+																									showEvts=verbose, showSentEvts=verbose, 
+																									showRecvEvts=verbose)
 		self.logEventSent = logEventSent
 		self.logEventReceived = logEventReceived
 		
@@ -115,8 +117,7 @@ class Client(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		expected = templates.dns(more=templates.resolv_success())
 		evt = self.received( expected = expected, timeout = timeout )
@@ -133,8 +134,7 @@ class Client(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		expected = templates.dns(more=templates.resolv_failed())
 		evt = self.received( expected = expected, timeout = timeout )

@@ -326,20 +326,12 @@ class Server(TestAdapterLib.Adapter):
         @param keyFile:  key file (default=/tmp/key.file)
         @type keyFile:   string
         """
-        # check agent
-        if agentSupport and agent is None:
-            raise Exception('Agent cannot be undefined!')   
-        if agentSupport:
-            if not isinstance(agent, dict):
-                raise Exception('Bad value passed on agent!')           
-            if not len(agent['name']):
-                raise Exception('Agent name cannot be empty!')  
-            if unicode(agent['type']) != unicode(AGENT_TYPE_EXPECTED):
-                raise Exception('Bad agent type: %s, expected: %s' % (agent['type'], unicode(AGENT_TYPE_EXPECTED)) )    
-        
         # init adapter
-        TestAdapterLib.Adapter.__init__(self, name = __NAME__, parent = parent, debug=debug, realname=name, shared=shared, 
-                                                       showEvts=verbose, showSentEvts=verbose, showRecvEvts=verbose)
+        TestAdapterLib.Adapter.__init__(self, name = __NAME__, parent = parent, debug=debug, 
+                                                       realname=name, shared=shared, agentSupport=agentSupport, agent=agent, 
+                                                       showEvts=verbose, showSentEvts=verbose, showRecvEvts=verbose,
+                                                       caller=TestAdapterLib.caller(),
+                                                       agentType=AGENT_TYPE_EXPECTED)
         if parentName is not None:
             TestAdapterLib.Adapter.setName(self, name="%s>%s" % (parentName,__NAME__)  )
         self.__mutex__ = threading.RLock()
@@ -986,8 +978,7 @@ class Server(TestAdapterLib.Adapter):
         @return: an event matching with the template or None otherwise
         @rtype: templatemessage     
         """
-        if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-            raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+        TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
         
         # construct the expected template
         tpl = templates.is_listening()
@@ -1007,8 +998,7 @@ class Server(TestAdapterLib.Adapter):
         @return: an event matching with the template or None otherwise
         @rtype: templatemessage     
         """
-        if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-            raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+        TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
         
         # construct the expected template
         tpl = templates.listening_failed()
@@ -1029,8 +1019,7 @@ class Server(TestAdapterLib.Adapter):
         @return: an event matching with the template or None otherwise
         @rtype: templatemessage     
         """
-        if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-            raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+        TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
         
         # construct the expected template
         tpl = templates.is_stopped()
@@ -1054,8 +1043,7 @@ class Server(TestAdapterLib.Adapter):
         @return: an event matching with the template or None otherwise
         @rtype: templatemessage     
         """
-        if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-            raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+        TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
         
         # construct the expected template
         tpl = templates.client_connected(id=clientId)
@@ -1079,8 +1067,7 @@ class Server(TestAdapterLib.Adapter):
         @return: an event matching with the template or None otherwise
         @rtype: templatemessage     
         """
-        if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-            raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+        TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
         
         # construct the expected template
         tpl = templates.client_disconnected(id=clientId)
@@ -1122,8 +1109,7 @@ class Server(TestAdapterLib.Adapter):
         @return: an event matching with the template or None otherwise
         @rtype: templatemessage     
         """
-        if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-            raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+        TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
         
         if self.cfg['ssl-support']:
             tpl = templates.received()

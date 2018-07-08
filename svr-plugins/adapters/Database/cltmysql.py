@@ -92,24 +92,15 @@ class MySQL(TestAdapterLib.Adapter):
 		@param agentSupport: agent support (default=False)
 		@type agentSupport:	boolean
 		"""
-		# check agent
-		if agentSupport and agent is None: 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "Agent cannot be undefined!" )	
-			
-		# check the agent
-		if agentSupport:
-			if not isinstance(agent, dict) : 
-				raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "agent argument is not a dict (%s)" % type(agent) )
-			if not len(agent['name']): 
-				raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "agent name cannot be empty" )
-			if  unicode(agent['type']) != unicode(AGENT_TYPE_EXPECTED): 
-				raise TestAdapterLib.ValueException(TestAdapterLib.caller(), 'Bad agent type: %s, expected: %s' % (agent['type'], unicode(AGENT_TYPE_EXPECTED))  )
-				
 		if not isinstance(port, int):
 			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "port argument is not a integer (%s)" % type(port) )
 
-		TestAdapterLib.Adapter.__init__(self, name = __NAME__, parent = parent, debug=debug, shared=shared, realname=name,
-																											showEvts=verbose, showSentEvts=verbose, showRecvEvts=verbose)
+		TestAdapterLib.Adapter.__init__(self, name = __NAME__, parent = parent, 
+																									debug=debug, shared=shared, realname=name,
+																									showEvts=verbose, showSentEvts=verbose, 
+																									showRecvEvts=verbose,
+																									caller=TestAdapterLib.caller(),
+																									agentType=AGENT_TYPE_EXPECTED)
 		
 		self.parent = parent
 		self.logEventSent = logEventSent
@@ -312,8 +303,7 @@ class MySQL(TestAdapterLib.Adapter):
 		@param timeout: time max to wait to receive event in second (default=1s)
 		@type timeout: integer		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		self.debug('connect to the db')
 		
@@ -391,8 +381,7 @@ class MySQL(TestAdapterLib.Adapter):
 		@return: result of the query, none otherwise
 		@rtype: none/event				
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = None
 		
@@ -428,8 +417,7 @@ class MySQL(TestAdapterLib.Adapter):
 		@return: True is successfully connected, false otherwise
 		@rtype: boolean		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		self.connect(dbName=dbName, timeout=timeout)
@@ -448,8 +436,7 @@ class MySQL(TestAdapterLib.Adapter):
 		@return: True is successfully disconnected, false otherwise
 		@rtype: boolean			
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		self.disconnect()
@@ -552,8 +539,7 @@ class MySQL(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		expected = templates.db( host=self.cfg['host'], port=self.cfg['port'], more=templates.connected() )
 		evt = self.received( expected = self.encapsule(db_event=expected), timeout = timeout )
@@ -576,8 +562,7 @@ class MySQL(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		expected = templates.db(host=self.cfg['host'], port=self.cfg['port'], more=templates.executed(status=status, nbChanged=nbChanged) )
 		evt = self.received( expected = self.encapsule(db_event=expected), timeout = timeout )
@@ -596,8 +581,7 @@ class MySQL(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		expected = templates.db(host=self.cfg['host'], port=self.cfg['port'], more=templates.terminated(nbRow=nbRow) )
 		evt = self.received( expected = self.encapsule(db_event=expected), timeout = timeout )
@@ -613,8 +597,7 @@ class MySQL(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		expected = templates.db(host=self.cfg['host'], port=self.cfg['port'], more=templates.disconnected() )
 		evt = self.received( expected = self.encapsule(db_event=expected), timeout = timeout )
@@ -631,8 +614,7 @@ class MySQL(TestAdapterLib.Adapter):
 		@return: an event matching with the template or None otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		expected = templates.db(host=self.cfg['host'], port=self.cfg['port'], more=templates.response(row=row, rowIndex=None, rowMax=None) )
 		evt = self.received( expected = self.encapsule(db_event=expected), timeout = timeout )

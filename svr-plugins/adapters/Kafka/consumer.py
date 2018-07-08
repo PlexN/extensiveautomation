@@ -100,26 +100,11 @@ class ConsumerClient(TestAdapterLib.Adapter):
 		@type shared:	boolean
 		"""	
 		self.bootstrap_servers = bootstrap_servers
-
-		# check agent
-		if agentSupport and agent is None:
-			msg_err = "Agent cannot be undefined!"
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err)	
-			
-		if agentSupport:
-			if not isinstance(agent, dict) : 
-				msg_err = "agent argument is not a dict (%s)" % type(agent) 
-				raise TestAdapterLib.ValueException(TestAdapterLib.caller(), )
-			if not len(agent['name']): 
-				msg_err = "agent name cannot be empty"
-				raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err)
-			if  unicode(agent['type']) != unicode(AGENT_TYPE_EXPECTED): 
-				msg_err = 'Bad agent type: %s, expected: %s' % (agent['type'], unicode(AGENT_TYPE_EXPECTED))
-				raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err)
-		
-
-		TestAdapterLib.Adapter.__init__(self, name = __NAME__, parent = parent, debug=debug, realname=name,
-										agentSupport=agentSupport, agent=agent, shared=shared)
+		TestAdapterLib.Adapter.__init__(self, name = __NAME__, parent = parent, 
+																										debug=debug, realname=name,
+																										agentSupport=agentSupport, agent=agent, shared=shared,
+																										caller=TestAdapterLib.caller(),
+																										agentType=AGENT_TYPE_EXPECTED)
 		self.parent = parent
 		self.codecX2D = Xml2Dict.Xml2Dict()
 		self.codecD2X = Dict2Xml.Dict2Xml(coding = None)
@@ -1027,9 +1012,7 @@ class ConsumerClient(TestAdapterLib.Adapter):
 		@param timeout: time max to wait to receive event in second (default=2s)
 		@type timeout: float		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool):
-			msg_err = "timeout argument is not a float or integer (%s)" % type(timeout)
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 
 		# construct the expected template
 		expected = templates.kafka_ops(method=CONNECT)
@@ -1045,9 +1028,7 @@ class ConsumerClient(TestAdapterLib.Adapter):
 		@param timeout: time max to wait to receive event in second (default=1s)
 		@type timeout: float		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool):
-			msg_err = "timeout argument is not a float or integer (%s)" % type(timeout)
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		if offset == None:
 			offset= { "offset":TestOperatorsLib.Any()}
@@ -1064,9 +1045,7 @@ class ConsumerClient(TestAdapterLib.Adapter):
 		@param timeout: time max to wait to receive event in second (default=1s)
 		@type timeout: float		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool):
-			msg_err = "timeout argument is not a float or integer (%s)" % type(timeout)
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		# construct the expected template
 		if partitions == None:
@@ -1084,9 +1063,7 @@ class ConsumerClient(TestAdapterLib.Adapter):
 		@param timeout: time max to wait to receive event in second (default=1s)
 		@type timeout: float		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool):
-			msg_err = "timeout argument is not a float or integer (%s)" % type(timeout)
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 
 		if record == None:
 			record = {"Partition": TestOperatorsLib.Any() , 
@@ -1111,9 +1088,7 @@ class ConsumerClient(TestAdapterLib.Adapter):
 		@param timeout: time max to wait to receive event in second (default=1s)
 		@type timeout: float		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool):
-			msg_err = "timeout argument is not a float or integer (%s)" % type(timeout)
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 
 		if topics == None:
 			topics= { "topics":TestOperatorsLib.Any()}
@@ -1130,9 +1105,7 @@ class ConsumerClient(TestAdapterLib.Adapter):
 		@param timeout: time max to wait to receive event in second (default=2s)
 		@type timeout: float		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool):
-			msg_err = "timeout argument is not a float or integer (%s)" % type(timeout)
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		expected = templates.kafka_ops(method=SUBSCRIBE)		
 		# try to match the template 
@@ -1150,9 +1123,7 @@ class ConsumerClient(TestAdapterLib.Adapter):
 		@param offset: Optional dict that we expect to be assigned to consumer 
 		@type offset: list of of TopicPartitions
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool):
-			msg_err = "timeout argument is not a float or integer (%s)" % type(timeout)
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 
 		if topics == None:
 			topics= { "topics":TestOperatorsLib.Any()}
@@ -1169,9 +1140,7 @@ class ConsumerClient(TestAdapterLib.Adapter):
 		@param timeout: time max to wait to receive event in second (default=2s)
 		@type timeout: float		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool):
-			msg_err = "timeout argument is not a float or integer (%s)" % type(timeout)
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		expected = templates.kafka_ops(method=UNSUBSCRIBE)		
 		# try to match the template 
@@ -1186,9 +1155,7 @@ class ConsumerClient(TestAdapterLib.Adapter):
 		@param timeout: time max to wait to receive event in second (default=2s)
 		@type timeout: float		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool):
-			msg_err = "timeout argument is not a float or integer (%s)" % type(timeout)
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		expected = templates.kafka_ops(method=CLOSE)		
 		# try to match the template 
@@ -1206,9 +1173,7 @@ class ConsumerClient(TestAdapterLib.Adapter):
 		@param offset: Optional dict that we expect to be assigned to consumer 
 		@type offset: dict of of TopicPartitions/OffsetAndTimestamp
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool):
-			msg_err = "timeout argument is not a float or integer (%s)" % type(timeout)
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 
 		if offsets == None:
 			offsets= {"offsets": TestOperatorsLib.Any() }
@@ -1225,9 +1190,7 @@ class ConsumerClient(TestAdapterLib.Adapter):
 		@param timeout: time max to wait to receive event in second (default=2s)
 		@type timeout: float		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool):
-			msg_err = "timeout argument is not a float or integer (%s)" % type(timeout)
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		expected = templates.kafka_ops(method=ASSIGN)		
 		# try to match the template 
@@ -1245,9 +1208,7 @@ class ConsumerClient(TestAdapterLib.Adapter):
 		@param offset: Optional partitions that we expect to be assigned to consumer 
 		@type offset: list of TopicPartitions 
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool):
-			msg_err = "timeout argument is not a float or integer (%s)" % type(timeout)
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 
 		if topicpartitions == None:
 			topicpartitions= { "topicpartitions": TestOperatorsLib.Any()}
@@ -1263,9 +1224,7 @@ class ConsumerClient(TestAdapterLib.Adapter):
 		@param timeout: time max to wait to receive event in second (default=2s)
 		@type timeout: float		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool):
-			msg_err = "timeout argument is not a float or integer (%s)" % type(timeout)
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		expected = templates.kafka_ops(method=SEEK)		
 		# try to match the template 
@@ -1280,9 +1239,7 @@ class ConsumerClient(TestAdapterLib.Adapter):
 		@param timeout: time max to wait to receive event in second (default=2s)
 		@type timeout: float		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool):
-			msg_err = "timeout argument is not a float or integer (%s)" % type(timeout)
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 			
 		expected = templates.kafka_ops(method=SEEK_TO_BEGINNING)			
 		# try to match the template 
@@ -1297,9 +1254,7 @@ class ConsumerClient(TestAdapterLib.Adapter):
 		@param timeout: time max to wait to receive event in second (default=2s)
 		@type timeout: float		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool):
-			msg_err = "timeout argument is not a float or integer (%s)" % type(timeout)
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 			
 		expected = templates.kafka_ops(method=SEEK_TO_END)			
 		# try to match the template 
@@ -1317,9 +1272,7 @@ class ConsumerClient(TestAdapterLib.Adapter):
 		@param offset: Optional partitions that we expect to be paused 
 		@type offset: Int
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool):
-			msg_err = "timeout argument is not a float or integer (%s)" % type(timeout)
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 
 		if offset == None:
 			offset= { "offset": TestOperatorsLib.Any()}
@@ -1339,9 +1292,7 @@ class ConsumerClient(TestAdapterLib.Adapter):
 		@param partitions: Optional TopicPartition object with expect last topic offset 
 		@type partitions: TopicPartition
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool):
-			msg_err = "timeout argument is not a float or integer (%s)" % type(timeout)
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 
 		if partitions == None:
 			partitions= { "partitions": TestOperatorsLib.Any()}
@@ -1361,9 +1312,7 @@ class ConsumerClient(TestAdapterLib.Adapter):
 		@param records: Optional records  that we expect to fetch 
 		@type records: dict of topic/records
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool):
-			msg_err = "timeout argument is not a float or integer (%s)" % type(timeout)
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 
 		if records == None:
 			records= { "records": TestOperatorsLib.Any()}
@@ -1380,9 +1329,7 @@ class ConsumerClient(TestAdapterLib.Adapter):
 		@param timeout: time max to wait to receive event in second (default=2s)
 		@type timeout: float		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool):
-			msg_err = "timeout argument is not a float or integer (%s)" % type(timeout)
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		expected = templates.kafka_ops(method=COMMIT)		
 		# try to match the template 
@@ -1397,9 +1344,7 @@ class ConsumerClient(TestAdapterLib.Adapter):
 		@param timeout: time max to wait to receive event in second (default=2s)
 		@type timeout: float		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool):
-			msg_err = "timeout argument is not a float or integer (%s)" % type(timeout)
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		expected = templates.kafka_ops(method=COMMIT_ASYNC)		
 		# try to match the template 
@@ -1417,9 +1362,7 @@ class ConsumerClient(TestAdapterLib.Adapter):
 		@param offsets: Optional offset for partitions that we expect to be paused 
 		@type offsets: TopicPartition
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool):
-			msg_err = "timeout argument is not a float or integer (%s)" % type(timeout)
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 
 		if offsets == None:
 			offsets= { "offsets": TestOperatorsLib.Any()}
@@ -1439,9 +1382,7 @@ class ConsumerClient(TestAdapterLib.Adapter):
 		@param topicpartitions: Optional partitions/offset list that we expect to be returned 
 		@type topicpartitions: list of TopicPartitions	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool):
-			msg_err = "timeout argument is not a float or integer (%s)" % type(timeout)
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 
 		if topicpartitions == None:
 			topicpartitions= { "offsets": TestOperatorsLib.Any()}
@@ -1458,9 +1399,7 @@ class ConsumerClient(TestAdapterLib.Adapter):
 		@param timeout: time max to wait to receive event in second (default=2s)
 		@type timeout: float		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool):
-			msg_err = "timeout argument is not a float or integer (%s)" % type(timeout)
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		expected = templates.kafka_ops(method=PAUSE)		
 		# try to match the template 
@@ -1478,9 +1417,7 @@ class ConsumerClient(TestAdapterLib.Adapter):
 		@param topicpartitions: Optional partitions that we expect to be paused 
 		@type timeout: list of TopicPartitions	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool):
-			msg_err = "timeout argument is not a float or integer (%s)" % type(timeout)
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 
 		if topicpartitions == None:
 			topicpartitions= { "partitions": TestOperatorsLib.Any()}
@@ -1497,9 +1434,7 @@ class ConsumerClient(TestAdapterLib.Adapter):
 		@param timeout: time max to wait to receive event in second (default=2s)
 		@type timeout: float		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool):
-			msg_err = "timeout argument is not a float or integer (%s)" % type(timeout)
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), msg_err )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		expected = templates.kafka_ops(method=RESUME)		
 		# try to match the template 

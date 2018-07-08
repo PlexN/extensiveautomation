@@ -101,8 +101,7 @@ class HostICMP(TestAdapterLib.Adapter):
 		@return: True for UP, False otherwise
 		@rtype: boolean		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = False
 		evt = self.isUp(host=host, timeout=timeout)
@@ -124,8 +123,7 @@ class HostICMP(TestAdapterLib.Adapter):
 		@return: True for down, False otherwise
 		@rtype: boolean		
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = False
 		evt = self.isDown(host=host, timeout=timeout)
@@ -147,8 +145,7 @@ class HostICMP(TestAdapterLib.Adapter):
 		@return: alive event
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		tpl = templates.pinger(destination=host, more=templates.ping(), type=templates.icmp() )
 		self.logSentEvent( shortEvt = "ping", tplEvt = tpl )
@@ -183,8 +180,7 @@ class HostICMP(TestAdapterLib.Adapter):
 		@return: no response event
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		tpl = templates.pinger(destination=host, more=templates.ping(), type=templates.icmp() )
 		self.logSentEvent( shortEvt = "ping", tplEvt = tpl )
@@ -219,8 +215,7 @@ class HostICMP(TestAdapterLib.Adapter):
 		@return: True if all hosts are up.
 		@rtype: boolean
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.areUp(hosts=hosts, timeout=timeout)
 		
@@ -239,8 +234,7 @@ class HostICMP(TestAdapterLib.Adapter):
 		@return: True if all hosts are up.
 		@rtype: boolean
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.areDown(hosts=hosts, timeout=timeout)
 		
@@ -258,8 +252,7 @@ class HostICMP(TestAdapterLib.Adapter):
 		@return: True if all hosts are up, False otherwise
 		@rtype: boolean
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		th = []
 		# parallelize
@@ -304,8 +297,7 @@ class HostICMP(TestAdapterLib.Adapter):
 		@return: True if all hosts are down, False otherwise
 		@rtype: boolean
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		th = []
 		# parallelize

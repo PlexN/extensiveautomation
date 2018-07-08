@@ -40,6 +40,7 @@ from Embedded import AdbAgent
 from Embedded import SikulixServerAgent
 from Embedded import AnsibleAgent
 from Embedded import KafkaAgent
+from Embedded import CurlAgent
 
 from Embedded import DummyProbe
 from Embedded import TextualProbe

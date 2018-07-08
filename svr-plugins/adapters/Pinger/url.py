@@ -98,8 +98,9 @@ class UrlAgent(threading.Thread):
 
 class URL(TestAdapterLib.Adapter):
 	@doc_public
-	def __init__(self, parent, name=None, responseCode=200, method='GET', responseBody=None, login=None, password=None,
-							https=False, timeout=2, debug=False, shared=False ):
+	def __init__(self, parent, name=None, responseCode=200, method='GET', 
+											responseBody=None, login=None, password=None,
+											https=False, timeout=2, debug=False, shared=False ):
 		"""
 		This class enable to check the status of an URL with the HTTP response code returned by the remote host
 
@@ -165,8 +166,7 @@ class URL(TestAdapterLib.Adapter):
 		@return:  True is UP, False otherwise
 		@rtype: boolean
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = False
 		evt = self.isUp(url=url, timeout=timeout, codeExpected=codeExpected, bodyExpected=bodyExpected)
@@ -194,8 +194,7 @@ class URL(TestAdapterLib.Adapter):
 		@return: alive event
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		responseCode = self.responseCode
 		responseBody = self.responseBody
@@ -238,8 +237,7 @@ class URL(TestAdapterLib.Adapter):
 		@return: True is the url is down, False otherwise
 		@rtype: boolean
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = False
 		evt = self.isDown(url=url, timeout=timeout)
@@ -261,8 +259,7 @@ class URL(TestAdapterLib.Adapter):
 		@return: no response event
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		tpl = templates.pinger(destination=url, more=templates.ping(), type=templates.url() )
 		self.logSentEvent( shortEvt = "ping", tplEvt = tpl )
@@ -297,8 +294,7 @@ class URL(TestAdapterLib.Adapter):
 		@return: global status, True if all urls are up.
 		@rtype: boolean
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.areUp(urls=urls, timeout=timeout)
 		
@@ -316,8 +312,7 @@ class URL(TestAdapterLib.Adapter):
 		@return: global status, True if all urls are up.
 		@rtype: boolean
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		th = []
 		# parallelize
@@ -362,8 +357,7 @@ class URL(TestAdapterLib.Adapter):
 		@return: global status, True if all urls are down.
 		@rtype: boolean
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.areDown(urls=urls, timeout=timeout)
 		
@@ -381,8 +375,7 @@ class URL(TestAdapterLib.Adapter):
 		@return: global status, True if all urls are down.
 		@rtype: boolean
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		th = []
 		# parallelize

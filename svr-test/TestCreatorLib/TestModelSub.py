@@ -152,8 +152,8 @@ try:
 		return TestProperties.Descriptions().get(name=name)
 	
 """)
-    te.append(TestModelCommon.INPUT_CUSTOM)
-    te.append(TestModelCommon.INPUT_CACHE)
+    # te.append(TestModelCommon.INPUT_CUSTOM)
+    # te.append(TestModelCommon.INPUT_CACHE)
     
     if SutLibrariesGeneric:
         te.append("""

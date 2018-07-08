@@ -24,7 +24,7 @@
 import TestExecutorLib.TestValidatorsLib as TestValidators
 import TestExecutorLib.TestTemplatesLib as TestTemplates
 import TestExecutorLib.TestOperatorsLib as TestOperators
-import TestExecutorLib.TestAdapterLib as TestAdapter
+import TestExecutorLib.TestAdapterLib as TestAdapterLib
 import TestExecutorLib.TestLibraryLib as TestLibrary
 from TestExecutorLib.TestExecutorLib import doc_public
 
@@ -195,7 +195,7 @@ class Selector(dict):
 
     child_selector, from_parent = child, sibling
  
-class Adb(TestAdapter.Adapter):
+class Adb(TestAdapterLib.Adapter):
 	@doc_public
 	def __init__(self, parent, agent, name=None, debug=False, verbose=True, shared=False):
 		"""
@@ -219,17 +219,12 @@ class Adb(TestAdapter.Adapter):
 		@param shared: shared adapter (default=False)
 		@type shared:	boolean
 		"""
-		# check the agent
-		if not isinstance(agent, dict) : 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "agent argument is not a dict (%s)" % type(agent) )
-		if not len(agent['name']): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "agent name cannot be empty" )
-		if  unicode(agent['type']) != unicode(AGENT_TYPE_EXPECTED): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), 'Bad agent type: %s, expected: %s' % (agent['type'], unicode(AGENT_TYPE_EXPECTED))  )
-		
-		TestAdapter.Adapter.__init__(self, name = __NAME__, parent = parent, debug=debug, realname=name,
-																							agentSupport=True, agent=agent, shared=shared,
-																							showEvts=verbose, showSentEvts=verbose, showRecvEvts=verbose)
+		TestAdapterLib.Adapter.__init__(self, name = __NAME__, parent = parent, 
+																										debug=debug, realname=name,
+																										agentSupport=True, agent=agent, shared=shared,
+																										showEvts=verbose, showSentEvts=verbose, showRecvEvts=verbose,
+																										caller=TestAdapterLib.caller(),
+																										agentType=AGENT_TYPE_EXPECTED)
 		self.parent = parent
 		self.codecX2D = Xml2Dict.Xml2Dict()
 		self.codecD2X = Dict2Xml.Dict2Xml(coding = None)
@@ -240,14 +235,14 @@ class Adb(TestAdapter.Adapter):
 		self.cmdId = 0
 		self.__mutexCmdId__ = threading.RLock()
 
-		self.TIMER_ALIVE_AGT = TestAdapter.Timer(parent=self, duration=20, name="keepalive-agent", callback=self.aliveAgent,
+		self.TIMER_ALIVE_AGT = TestAdapterLib.Timer(parent=self, duration=20, name="keepalive-agent", callback=self.aliveAgent,
 																																logEvent=False, enabled=True)
 		self.__checkConfig()
 		
 		# initialize the agent with no data
 		self.prepareAgent(data={'shared': shared})
 		if self.agentIsReady(timeout=30) is None: 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "Agent %s is not ready" % self.cfg['agent-name'] )
+			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "Agent %s is not ready" % self.cfg['agent-name'] )
 		self.TIMER_ALIVE_AGT.start()
 			
 	def __checkConfig(self):	
@@ -1164,8 +1159,7 @@ class Adb(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		# construct the expected template
 		expected = self.encapsule(layer_gui=templates.gui(action=actionName, actionId=actionId, result=ADB_ACTION_OK ))

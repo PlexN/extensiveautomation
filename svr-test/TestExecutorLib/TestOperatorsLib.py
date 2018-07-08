@@ -155,7 +155,12 @@ class RegEx:
         @rtype: boolean
         """
         if haystack is None: raise TestOperatorsException("ERR_OP_011: string expected not none")
-        
+
+        try:
+            haystack = unicode(haystack)
+        except UnicodeDecodeError:
+            haystack = haystack.decode("utf8")
+            
         m = re.match( re.compile(self.needle, flags=re.S), haystack )
         if m:
             return True
@@ -208,6 +213,11 @@ class NotRegEx:
         """
         if haystack is None: raise TestOperatorsException("ERR_OP_011: string expected not none")
         
+        try:
+            haystack = unicode(haystack)
+        except UnicodeDecodeError:
+            haystack = haystack.decode("utf8")
+            
         m = re.match( re.compile(self.needle, re.S), haystack)
         if not m:
             return True
@@ -260,6 +270,11 @@ class Startswith:
         """
         if haystack is None: raise TestOperatorsException("ERR_OP_011: string expected not none")
         
+        try:
+            haystack = unicode(haystack)
+        except UnicodeDecodeError:
+            haystack = haystack.decode("utf8")
+            
         if haystack.startswith( self.needle ):
             return True
         else:
@@ -311,6 +326,11 @@ class NotStartswith:
         """
         if haystack is None: raise TestOperatorsException("ERR_OP_011: string expected not none")
         
+        try:
+            haystack = unicode(haystack)
+        except UnicodeDecodeError:
+            haystack = haystack.decode("utf8")
+            
         if not haystack.startswith( self.needle ):
             return True
         else:
@@ -362,6 +382,11 @@ class Endswith:
         """
         if haystack is None: raise TestOperatorsException("ERR_OP_011: string expected not none")
         
+        try:
+            haystack = unicode(haystack)
+        except UnicodeDecodeError:
+            haystack = haystack.decode("utf8")
+            
         if haystack.endswith( self.needle ):
             return True
         else:
@@ -413,6 +438,11 @@ class NotEndswith:
         """
         if haystack is None: raise TestOperatorsException("ERR_OP_011: string expected not none")
         
+        try:
+            haystack = unicode(haystack)
+        except UnicodeDecodeError:
+            haystack = haystack.decode("utf8")
+            
         if not haystack.endswith( self.needle ):
             return True
         else:
@@ -474,6 +504,11 @@ class Contains:
         """
         if haystack is None: raise TestOperatorsException("ERR_OP_011: string expected not none")
         
+        try:
+            haystack = unicode(haystack)
+        except UnicodeDecodeError:
+            haystack = haystack.decode("utf8")
+            
         needles = self.needle
         if not isinstance(self.needle, list):
             needles = [ self.needle ]
@@ -554,6 +589,11 @@ class NotContains:
         """
         if haystack is None: raise TestOperatorsException("ERR_OP_011: string expected not none")
         
+        try:
+            haystack = unicode(haystack)
+        except UnicodeDecodeError:
+            haystack = haystack.decode("utf8")
+            
         needles = self.needle
         if not isinstance(self.needle, list):
             needles = [ self.needle ]

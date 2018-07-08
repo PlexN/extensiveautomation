@@ -25,12 +25,12 @@ try:
 	from client import *
 	from templates import *
 	from server import *
-	from curl import *
+	from curl_http import *
 except ImportError: # python3 support
 	from .client import *
 	from .templates import *
 	from .server import *
-	from .curl import *
+	from .curl_http import *
 	
 __DESCRIPTION__ = """This adapter enable to use the HTTP protocol.
 

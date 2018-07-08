@@ -24,6 +24,7 @@
 """
 Test data module
 """
+
 import sys
 
 # unicode = str with python3
@@ -45,9 +46,15 @@ import re
 
 r = re.compile( u"[^\x09\x0A\x0D\x20-\x7E\x85\xA0-\xFF\u0100-\uD7FF\uE000-\uFDCF\uFDE0-\uFFFD]")
 def removeInvalidXML(string):
-  def replacer(m):
-    return ""
-  return re.sub(r,replacer,string)
+    """
+    Remove invalid XML
+    """
+    def replacer(m):
+        """
+        return empty string
+        """
+        return ""
+    return re.sub(r,replacer,string)
   
 DEFAULT_MODE = 'Raw'
 
@@ -118,7 +125,9 @@ class DataModel(GenericModel.GenericModel):
                                                ]
                                       },
                                     'inputs-parameters': {
-                                        'parameter': [ {'type': 'str', 'name': 'PARAM1', 'description': '', 'value' : 'Sample', 'color': '' } ]
+                                        'parameter': [ {'type': 'str', 'name': 'PARAM1', 
+                                                        'description': '', 'value' : 'Sample', 
+                                                        'color': '',  'scope': 'local' } ]
                                             }
                                 }
                             }
@@ -158,13 +167,6 @@ class DataModel(GenericModel.GenericModel):
         Fix encodage not pretty....
         """
         for param in self.properties['properties']['inputs-parameters']['parameter']:
-            # if sys.version_info > (3,): # python3 support
-                # param['color'] = bytes2str(param['color'])
-                # param['type'] = bytes2str(param['type'])
-                # param['value'] = bytes2str(param['value'])
-                # param['description'] = bytes2str(param['description'])
-                # param['name'] = bytes2str(param['name'])
-            # else:
             param['value'] = param['value'].decode("utf-8")
             param['description'] = param['description'].decode("utf-8")
             param['name'] = param['name'].decode("utf-8")
@@ -174,17 +176,11 @@ class DataModel(GenericModel.GenericModel):
         Fix encodage not pretty....
         """
         for descr in self.properties['properties']['descriptions']['description']:
-            # if sys.version_info > (3,): # python3 support
-                # descr['key'] =  bytes2str(descr['key'])
-            # else:
             descr['key'] = descr['key'].decode("utf-8")
                 
             if isinstance( descr['value'], dict):
                 pass
             else:
-                # if sys.version_info > (3,): # python3 support
-                    # descr['value'] =  bytes2str(descr['value'])
-                # else:
                 descr['value'] = descr['value'].decode("utf-8")
 
     def setTestData(self, testData):
@@ -232,24 +228,17 @@ class DataModel(GenericModel.GenericModel):
                         i = -1
                         for kv in properties['descriptions']['description']:
                             i += 1
-                            # if sys.version_info > (3,): # python3 support
-                                # if keyequals( key=kv['key'], search='date' ): creationDate = kv['value']; creationDateIndex=i;
-                            # else: 
                             if kv['key'] == 'date':
                                 creationDate = kv['value']; creationDateIndex=i;
                         if creationDate is not None:
                             properties['descriptions']['description'].pop(creationDateIndex)
-                            properties['descriptions']['description'].append( {'key': 'creation date', 'value': creationDate } )
-                            #properties['descriptions']['description'].remove( {'key': 'date', 'value': creationDate, '@value': {}, '@key': {} } ) 
+                            properties['descriptions']['description'].append( {'key': 'creation date', 'value': creationDate } ) 
                     # END NEW in 5.1.0
                     
                     # BEGIN NEW in 8.0.0
                     if 'descriptions' in properties:
                         dataMode = False
                         for kv in properties['descriptions']['description']:
-                            # if sys.version_info > (3,): # python3 support
-                                # if keyequals( key=kv['key'], search='data mode' ): dataMode = True
-                            # else: 
                             if kv['key'] == 'data mode':
                                 dataMode = True
                         if not dataMode:
@@ -273,6 +262,7 @@ class DataModel(GenericModel.GenericModel):
                         self.fixXML( data = properties['descriptions'], key = 'description' )
                         if '@description' in properties['descriptions']:
                             self.fixXML( data = properties['descriptions'], key = '@description' )
+
                     except Exception as e:
                         self.error( "TestData >  fix xml %s" % str(e) )
                     else:

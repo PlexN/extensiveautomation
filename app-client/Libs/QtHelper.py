@@ -32,19 +32,22 @@ try:
 	from PyQt4.QtGui import (QColor, QToolButton, QApplication, QTextEdit, QCompleter, QWidget, QPlainTextEdit,
 							QLineEdit, QPushButton, QHBoxLayout, QLabel, QDialog, QIcon, QCursor,
 							QDesktopWidget, QVBoxLayout, QSizePolicy, QMovie, QProgressBar, 
-							QPixmap, QAction, QPainter, QRadialGradient, QTransform, QFrame)
+							QPixmap, QAction, QPainter, QRadialGradient, QTransform, QFrame,
+                            QTextCursor, QStringListModel)
 	from PyQt4.QtCore import (Qt, pyqtSignal, QVariant, QSize, QPointF, QRect)
 	from PyQt4.Qsci import (QsciScintilla, QsciLexerPython, QsciLexerXML, 
-                            QsciLexerBash, QsciLexerJSON)
+                            QsciLexerBash, QsciLexerJSON, QsciAPIs)
 	if sys.version_info < (3,): from PyQt4.QtCore import (QString)
 except ImportError:
-	from PyQt5.QtGui import (QColor, QIcon, QMovie, QPixmap, QPainter, QRadialGradient, QTransform, QCursor)
-	from PyQt5.QtWidgets import (QToolButton, QApplication, QTextEdit, QCompleter, QWidget, QLineEdit, QPlainTextEdit,
-							QPushButton, QHBoxLayout, QLabel, QDialog, QDesktopWidget, 
-							QVBoxLayout, QSizePolicy, QProgressBar, QAction, QFrame)
-	from PyQt5.QtCore import (Qt, pyqtSignal, QVariant, QSize, QPointF, QRect)
+	from PyQt5.QtGui import (QColor, QIcon, QMovie, QPixmap, QPainter, QRadialGradient, 
+                             QTransform, QCursor, QTextCursor,  )
+	from PyQt5.QtWidgets import (QToolButton, QApplication, QTextEdit, QCompleter, 
+                                QWidget, QLineEdit, QPlainTextEdit,
+                                QPushButton, QHBoxLayout, QLabel, QDialog, QDesktopWidget, 
+                                QVBoxLayout, QSizePolicy, QProgressBar, QAction, QFrame)
+	from PyQt5.QtCore import (Qt, pyqtSignal, QVariant, QSize, QPointF, QRect, QStringListModel)
 	from PyQt5.Qsci import (QsciScintilla, QsciLexerPython, QsciLexerXML, 
-                            QsciLexerBash, QsciLexerJSON)
+                            QsciLexerBash, QsciLexerJSON, QsciAPIs)
 	IS_QT5 = True
 	
 import os
@@ -273,11 +276,26 @@ class CustomEditor(QsciScintilla):
         """
         Create qt widget
         """
-        self.setLexer( CustomLexer() )
+        lexer = CustomLexer() 
+        # api = QsciAPIs(lexer)
+        
+        # Add autocompletion strings
+        # api.add("aLongString")
+        # api.add("aLongerString")
+        # api.add("aDifferentString")
+        # api.add("sOmethingElse")
+        # Compile the api for use in the lexer
+        # api.prepare()
+
+        self.setLexer( lexer )
         
         if self.jsonLexer: self.setLexer( QsciLexerJSON() )          
         if self.codeFolding: self.setFolding(QsciScintilla.BoxedTreeFoldStyle)
-            
+
+
+        self.setAutoCompletionThreshold(1)
+        self.setAutoCompletionSource(QsciScintilla.AcsAPIs)
+        
     def createConnections (self):
         """
         create qt connections
@@ -335,16 +353,50 @@ class CustomEditor(QsciScintilla):
             self.foldAll(children=True)
         else:
             self.foldAll()
+
             
+class MainCompleter(QCompleter):
+    insertText = pyqtSignal(str)
+    def __init__(self, parent=None):
+        """
+        """
+        QCompleter.__init__(self, [], parent)
+        
+        self.suffix = ":"
+        self.activated.connect(self.changeCompletion)
+        
+    def setSuffix(self, suffix):
+        """
+        """
+        self.suffix = suffix
+        
+    def changeCompletion(self, completion):
+        """
+        """
+        self.insertText.emit( "%s%s" % (completion, self.suffix))
+
+        
 class RawEditor(QTextEdit):
     """
     Raw editor
     """
-    def __init__(self, parent):
+    def __init__(self, parent, completerMode=False, 
+                 dataCache=[], dataInputs=[]):
         """
         Text raw editor 
         """
         QTextEdit.__init__(self, parent)
+        
+        self.completerMode = completerMode
+        self.dataCache = dataCache
+        self.dataInputs = dataInputs
+        
+        if self.completerMode:
+            self.completer = MainCompleter()
+            self.completer.setWidget(self)
+            self.completer.setCompletionMode(QCompleter.PopupCompletion)
+            self.completer.insertText.connect(self.insertCompletion)
+
         self.createWidget()
 
     def createWidget(self):
@@ -379,7 +431,105 @@ class RawEditor(QTextEdit):
             return True
         else:
             return False
+            
+    def textUnderCursor(self):
+        """
+        """
+        tc = self.textCursor()
+        tc.select(QTextCursor.WordUnderCursor)
+        return tc.selectedText()
 
+    def insertCompletion(self, completion):
+        """
+        """
+        tc = self.textCursor()
+        extra = (len(completion) - len(self.completer.completionPrefix()))
+        tc.movePosition(QTextCursor.Left)
+        tc.movePosition(QTextCursor.EndOfWord)
+        tc.insertText(completion[-extra:])
+        self.setTextCursor(tc)
+    
+        completionPrefix = self.textUnderCursor()
+        tc = self.textCursor()
+        tc.select(QTextCursor.BlockUnderCursor)
+        
+        if tc.selectedText().endswith("[!CACHE:"):
+            self.completer.setModel( QStringListModel( self.dataCache, self ) )
+            self.completer.setSuffix( suffix=":]" )
+            
+            self.refreshPopupCompleter()
+            
+        if tc.selectedText().endswith("[!INPUT:"):
+            self.completer.setModel( QStringListModel( self.dataInputs, self ) )
+            self.completer.setSuffix( suffix=":]" )
+            
+            self.refreshPopupCompleter()
+            
+    def currentCompleter(self):
+        """
+        """
+        return self.completer
+        
+    def keyPressEvent(self, event):
+        """
+        """
+        if not self.completerMode:
+            QTextEdit.keyPressEvent(self, event)
+            return
+            
+        if self.completer.popup() and self.completer.popup().isVisible():
+            if event.key() in ( Qt.Key_Enter, Qt.Key_Return,
+                                Qt.Key_Escape, Qt.Key_Tab,
+                                Qt.Key_Backtab ):
+                event.ignore()
+                return
+                
+         ## has ctrl-Space been pressed??
+        isShortcut = (event.modifiers() == Qt.ControlModifier and\
+                      event.key() == Qt.Key_Space)
+
+        if (not self.completer or not isShortcut):
+            QTextEdit.keyPressEvent(self, event)
+
+        tc = self.textCursor()
+        tc.select(QTextCursor.BlockUnderCursor)
+        selectedText = tc.selectedText()
+        
+        if selectedText.endswith("[!"):
+            self.completer.setModel( QStringListModel( [ "CACHE", "INPUT", "CAPTURE" ], self ) )
+            self.completer.setSuffix( suffix=":" )
+            
+            self.refreshPopupCompleter()
+     
+        if selectedText.endswith("[!CACHE:"):
+            self.completer.setModel( QStringListModel( self.dataCache, self ) )
+            self.completer.setSuffix( suffix=":]" )
+            
+            self.refreshPopupCompleter()
+            
+        if selectedText.endswith("[!INPUT:"):
+            self.completer.setModel( QStringListModel( self.dataInputs, self ) )
+            self.completer.setSuffix( suffix=":]" )
+            
+            self.refreshPopupCompleter()
+            
+        if self.completer.popup().isVisible():
+            self.refreshPopupCompleter()
+            
+    def refreshPopupCompleter(self):
+        """
+        """
+        completionPrefix = self.textUnderCursor()
+        self.completer.setCompletionPrefix(completionPrefix)
+        
+        popup = self.completer.popup()
+        popup.setCurrentIndex(
+            self.completer.completionModel().index(0,0))
+        cr = self.cursorRect()
+        cr.setWidth(self.completer.popup().sizeHintForColumn(0)
+            + self.completer.popup().verticalScrollBar().sizeHint().width())
+        self.completer.complete(cr)
+        
 class RawFind(QWidget):  
     """
     Raw find widget
@@ -551,15 +701,18 @@ class LineTextWidget(QFrame):
  
             QWidget.paintEvent(self, event)
  
-    def __init__(self, *args):
+    def __init__(self, completerMode=False, dataCache=[], dataInputs=[]):
         """
         Constructor
         """
-        QFrame.__init__(self, *args)
+        QFrame.__init__(self)
  
         self.setFrameStyle(QFrame.StyledPanel | QFrame.Sunken)
 
-        self.edit = RawEditor(parent=self)
+        self.edit = RawEditor(parent=self, 
+                              completerMode=completerMode,
+                              dataCache=dataCache, 
+                              dataInputs=dataInputs)
         self.edit.setFrameStyle(QFrame.NoFrame)
 
         self.number_bar = self.NumberBar()

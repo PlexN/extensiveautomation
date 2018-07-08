@@ -178,11 +178,7 @@ class DataModel(GenericModel.GenericModel):
                         self.fixXML( data = properties['parameters'], key = '@parameter' )
 
                     # BEGIN NEW in 19.0.0 : add missing scope parameters
-                    for p in properties['inputs-parameters']['parameter']:
-                        if "scope" not in p: 
-                            p["scope"] = "local"
-                            p["@scope"] = {}
-                    for p in properties['outputs-parameters']['parameter']:
+                    for p in properties['parameters']['parameter']:
                         if "scope" not in p: 
                             p["scope"] = "local"
                             p["@scope"] = {}

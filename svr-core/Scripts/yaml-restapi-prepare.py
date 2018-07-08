@@ -26,9 +26,9 @@ sys.path.insert(0, '../' )
 import inspect
 import ast
 
-import Controls.RestCommonFunctions as CommonFunctions
-import Controls.RestTesterFunctions as TesterFunctions
-import Controls.RestAdminFunctions as AdminFunctions
+import ServerControls.RestCommonFunctions as CommonFunctions
+import ServerControls.RestTesterFunctions as TesterFunctions
+import ServerControls.RestAdminFunctions as AdminFunctions
 from Libs import Settings
 
 # load settings file

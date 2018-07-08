@@ -24,7 +24,7 @@
 import TestExecutorLib.TestValidatorsLib as TestValidators
 import TestExecutorLib.TestTemplatesLib as TestTemplates
 import TestExecutorLib.TestOperatorsLib as TestOperators
-import TestExecutorLib.TestAdapterLib as TestAdapter
+import TestExecutorLib.TestAdapterLib as TestAdapterLib
 import TestExecutorLib.TestExecutorLib as TestExecutor
 from TestExecutorLib.TestExecutorLib import doc_public
 
@@ -130,7 +130,7 @@ AGENT_TYPE_EXPECTED='seleniumserver'
 
 class NotReady(Exception): pass
 
-class Selenium(TestAdapter.Adapter):
+class Selenium(TestAdapterLib.Adapter):
 	@doc_public
 	def __init__(self, parent, agent, name=None, debug=False, verbose=True, shared=False, navigId=None, waitUntil=True):
 		"""
@@ -160,16 +160,12 @@ class Selenium(TestAdapter.Adapter):
 		@param shared: shared adapter (default=False)
 		@type shared:	boolean
 		"""
-		# check the agent
-		if not isinstance(agent, dict) : 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "agent argument is not a dict (%s)" % type(agent) )
-		if not len(agent['name']): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "agent name cannot be empty" )
-		if  unicode(agent['type']) != unicode(AGENT_TYPE_EXPECTED): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), 'Bad agent type: %s, expected: %s' % (agent['type'], unicode(AGENT_TYPE_EXPECTED))  )
-		
-		TestAdapter.Adapter.__init__(self, name = __NAME__, parent = parent, debug=debug, realname=name, shared=shared,
-																									showEvts=verbose, showSentEvts=verbose, showRecvEvts=verbose)
+		TestAdapterLib.Adapter.__init__(self, name = __NAME__, parent = parent, 
+																										debug=debug, realname=name, shared=shared,
+																										showEvts=verbose, showSentEvts=verbose, 
+																										showRecvEvts=verbose,
+																										caller=TestAdapterLib.caller(),
+																										agentType=AGENT_TYPE_EXPECTED)
 		self.parent = parent
 		self.codecX2D = Xml2Dict.Xml2Dict()
 		self.codecD2X = Dict2Xml.Dict2Xml(coding = None)
@@ -181,7 +177,7 @@ class Selenium(TestAdapter.Adapter):
 		
 		self.cfg['wait-until'] = waitUntil
 		
-		self.TIMER_ALIVE_AGT = TestAdapter.Timer(parent=self, duration=20, name="keepalive-agent", callback=self.aliveAgent,
+		self.TIMER_ALIVE_AGT = TestAdapterLib.Timer(parent=self, duration=20, name="keepalive-agent", callback=self.aliveAgent,
 																																logEvent=False, enabled=True)
 		self.__checkConfig()
 		
@@ -200,7 +196,7 @@ class Selenium(TestAdapter.Adapter):
 		# initialize the agent with no data
 		self.prepareAgent(data={'shared': shared})
 		if self.agentIsReady(timeout=30) is None:
-			raise TestAdapter.ValueException(TestAdapter.caller(), "Agent %s is not ready" % self.cfg['agent-name'] )	
+			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "Agent %s is not ready" % self.cfg['agent-name'] )	
 		self.TIMER_ALIVE_AGT.start()
 
 	def __checkConfig(self):	
@@ -497,7 +493,7 @@ class Selenium(TestAdapter.Adapter):
 		"""
 		if command != Command.NEW_SESSION and self.navigId is None:
 			#raise NotReady("No nagivation id defined!")
-			raise TestAdapter.AdapterException(TestAdapter.caller(), "No nagivation id defined!" )
+			raise TestAdapterLib.AdapterException(TestAdapterLib.caller(), "No nagivation id defined!" )
 			
 		# prepare agent request
 		cmdId = self.getCommandId()
@@ -602,8 +598,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: True on action OK, False otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		if withFirefox:
@@ -625,7 +620,7 @@ class Selenium(TestAdapter.Adapter):
 			ret = False
 		else:
 			if not( targetUrl.startswith("http://") or targetUrl.startswith("https://")  ):
-				raise TestAdapter.ValueException(TestAdapter.caller(), "target url not start with http(s):// (%s)" % type(targetUrl) )
+				raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "target url not start with http(s):// (%s)" % type(targetUrl) )
 			cmdId = self.loadUrl(url=targetUrl)
 			if self.isUrlLoaded(timeout=timeout, commandId=cmdId) is None:
 				ret = False
@@ -641,8 +636,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: True on action OK, False otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		cmdId = self.quitNavig()
@@ -660,8 +654,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: True on action OK, False otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		cmdId = self.closeWindow()
@@ -682,8 +675,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: True on action OK, False otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 			
 		ret = True
 		
@@ -733,8 +725,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: False on action KO, the text otherwise
 		@rtype: string	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		cmdId = self.getTitle()
@@ -759,8 +750,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: True if text found, False otherwise
 		@rtype: string	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		cmdId = self.getTitle()
@@ -779,8 +769,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: False on action KO, the text otherwise
 		@rtype: string	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		cmdId = self.getUrl()
@@ -805,8 +794,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: True if text found, False otherwise
 		@rtype: string	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		cmdId = self.getUrl()
@@ -825,8 +813,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: False on action KO, the text otherwise
 		@rtype: string	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		cmdId = self.getPageSource()
@@ -851,8 +838,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: True if text found, False otherwise
 		@rtype: string	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		cmdId = self.getPageSource()
@@ -900,8 +886,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: True on action OK, False otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 			
 		ret = True
 		more = {}
@@ -960,8 +945,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: True on action OK, False otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 			
 		ret = True
 		more = {}
@@ -1033,8 +1017,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: True on action OK, False otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 			
 		ret = True
 		more = {}
@@ -1106,8 +1089,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: True on action OK, False otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		more = {}
@@ -1175,8 +1157,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: True on action OK, False otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		more = {}
@@ -1259,8 +1240,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: False on action KO, the text otherwise
 		@rtype: string	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		
@@ -1330,11 +1310,10 @@ class Selenium(TestAdapter.Adapter):
 		@return: False on action KO, the text otherwise
 		@rtype: string	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		if expectedText is None: 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "expectedText argument cannot be equal to none" )
+			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "expectedText argument cannot be equal to none" )
 
 		ret = True
 		
@@ -1400,8 +1379,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: True on action OK, False otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		
@@ -1464,8 +1442,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: True on action OK, False otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		
@@ -1533,8 +1510,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: True on action OK, False otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		
@@ -1602,8 +1578,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: True on action OK, False otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		
@@ -1671,11 +1646,10 @@ class Selenium(TestAdapter.Adapter):
 		@return: True on action OK, False otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		if text is None: 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "text argument cannot be equal to none" )
+			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "text argument cannot be equal to none" )
 
 		ret = True
 		
@@ -1744,13 +1718,12 @@ class Selenium(TestAdapter.Adapter):
 		@return: True if the size if OK, False otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		if x is None: 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "x argument cannot be equal to none")
+			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "x argument cannot be equal to none")
 		if y is None: 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "y argument cannot be equal to none" )
+			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "y argument cannot be equal to none" )
 
 		ret = False
 		
@@ -1826,13 +1799,12 @@ class Selenium(TestAdapter.Adapter):
 		@return: True if the size if OK, False otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		if width is None: 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "width argument cannot be equal to none" )
+			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "width argument cannot be equal to none" )
 		if height is None: 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "height argument cannot be equal to none" )
+			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "height argument cannot be equal to none" )
 		
 		ret = False
 		
@@ -1909,8 +1881,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: True on action OK, False otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		
@@ -1948,8 +1919,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: True on action OK, False otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		cmdId = self.maximizeWindow( windowHandle=windowHandle)
@@ -1967,8 +1937,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: True on action OK, False otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		cmdId = self.refreshPage()
@@ -1986,8 +1955,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: True on action OK, False otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		cmdId = self.navigBack()
@@ -2005,8 +1973,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: True on action OK, False otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		cmdId = self.navigForward()
@@ -2024,8 +1991,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: True on action OK, False otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		cmdId = self.dismissAlert()
@@ -2043,8 +2009,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: True on action OK, False otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		cmdId = self.acceptAlert()
@@ -2062,8 +2027,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: True on action OK, False otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		cmdId = self.getTextAlert()
@@ -2090,8 +2054,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: True on action OK, False otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		cmdId = self.authenticateDialog(username=username, password=password)
@@ -2139,8 +2102,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: True on action OK, False otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		cmdId = self.findElement(elementId=None, name=name, tagName=tagName, className=className,
@@ -2168,8 +2130,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: True on action OK, False otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		cmdId = self.getCurrentWindowHandle()
@@ -2240,8 +2201,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: False on action KO, the text otherwise
 		@rtype: string	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		
@@ -2307,8 +2267,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: True on action OK, False otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		
@@ -2389,8 +2348,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: True on action OK, False otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		
@@ -2471,8 +2429,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: True on action OK, False otherwise
 		@rtype: boolean	
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		if not self.cfg['wait-until']:
@@ -2524,8 +2481,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: True on action OK, False otherwise
 		@rtype: boolean   
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool):
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		ret = True
 		cmdId = self.switchToDefaultFrame()
@@ -2648,8 +2604,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: internal command id
 		@rtype: string
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		cmdId = self.executeCommand(Command.IMPLICIT_WAIT, {'ms': float(timeout) * 1000})
 		return cmdId
@@ -2959,7 +2914,7 @@ class Selenium(TestAdapter.Adapter):
 			value = cssSelector
 		
 		if by is None: 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "please to specify how to find the element" )
+			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "please to specify how to find the element" )
 		if location is not None: 
 			by = By.XPATH
 			value = location
@@ -3046,7 +3001,7 @@ class Selenium(TestAdapter.Adapter):
 			by = By.XPATH
 			value = location
 		if by is None: 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "please to specify how to find the element" )
+			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "please to specify how to find the element" )
 
 		params = {'using': by, 'value': value}
 		if elementId is not None:
@@ -3129,7 +3084,7 @@ class Selenium(TestAdapter.Adapter):
 			by = By.XPATH
 			value = location
 		if by is None: 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "please to specify how to find the element" )
+			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "please to specify how to find the element" )
 
 		params = {'using': by, 'value': value}
 		params['id'] = elementId
@@ -3212,7 +3167,7 @@ class Selenium(TestAdapter.Adapter):
 			by = By.XPATH
 			value = location
 		if by is None: 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "please to specify how to find the element" )
+			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "please to specify how to find the element" )
 
 		params = {'using': by, 'value': value}
 		params['id'] = elementId
@@ -3611,8 +3566,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		# construct the expected template
 		expected = self.encapsule(layer_gui=templates.gui(action=commandName, actionId=commandId, result=ACTION_OK, value=expectedValue ))
@@ -3635,8 +3589,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.SWITCH_TO_FRAME, commandId=commandId)
 	@doc_public
@@ -3653,8 +3606,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.SWITCH_TO_WINDOW, commandId=commandId)
 	@doc_public
@@ -3671,8 +3623,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.NEW_SESSION, commandId=commandId)
 	
@@ -3690,8 +3641,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.QUIT, commandId=commandId)
 	@doc_public
@@ -3708,8 +3658,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.CLOSE, commandId=commandId)
 		
@@ -3727,8 +3676,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.GET, commandId=commandId)
 		
@@ -3746,8 +3694,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.MAXIMIZE_WINDOW, commandId=commandId)
 	@doc_public
@@ -3764,8 +3711,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.REFRESH, commandId=commandId)
 	@doc_public
@@ -3782,8 +3728,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.GO_BACK, commandId=commandId)
 	@doc_public
@@ -3800,8 +3745,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.GO_FORWARD, commandId=commandId)
 	@doc_public
@@ -3818,8 +3762,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.GET_CURRENT_WINDOW_HANDLE, 
 																						commandId=commandId)
@@ -3838,8 +3781,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.GET_WINDOW_HANDLES, 
 																						commandId=commandId)
@@ -3861,8 +3803,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		valueLayer = TestTemplates.TemplateLayer(name="")
 		if expectedText is not None:
@@ -3887,8 +3828,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		valueLayer = TestTemplates.TemplateLayer(name="")
 		if expectedText is not None:
@@ -3913,8 +3853,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		valueLayer = TestTemplates.TemplateLayer(name="")
 		if expectedText is not None:
@@ -3936,8 +3875,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.SCREENSHOT, 
 																						commandId=commandId)
@@ -3956,8 +3894,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.FIND_ELEMENT, 
 																						commandId=commandId)
@@ -3976,8 +3913,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.FIND_ELEMENTS, 
 																						commandId=commandId)
@@ -3995,8 +3931,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.FIND_CHILD_ELEMENT, 
 																						commandId=commandId)
@@ -4015,8 +3950,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.FIND_CHILD_ELEMENTS, 
 																						commandId=commandId)
@@ -4037,8 +3971,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		valueLayer = TestTemplates.TemplateLayer(name="")
 		if expectedText is not None:
@@ -4063,8 +3996,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		valueLayer = TestTemplates.TemplateLayer(name="")
 		if expectedText is not None:
@@ -4086,8 +4018,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.CLICK_ELEMENT, 
 																						commandId=commandId)
@@ -4106,8 +4037,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.SUBMIT_ELEMENT, 
 																						commandId=commandId)
@@ -4126,8 +4056,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.CLEAR_ELEMENT, 
 																						commandId=commandId)
@@ -4146,8 +4075,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.IS_ELEMENT_SELECTED, 
 																						commandId=commandId)
@@ -4166,8 +4094,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.IS_ELEMENT_ENABLED, 
 																						commandId=commandId)
@@ -4186,8 +4113,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.IS_ELEMENT_DISPLAYED, 
 																						commandId=commandId)
@@ -4206,8 +4132,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.GET_ELEMENT_SIZE, 
 																						commandId=commandId)
@@ -4226,8 +4151,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.GET_ELEMENT_LOCATION, 
 																						commandId=commandId)
@@ -4246,8 +4170,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.SEND_KEYS_TO_ELEMENT, 
 																						commandId=commandId)
@@ -4266,8 +4189,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.MOVE_TO, 
 																						commandId=commandId)
@@ -4286,8 +4208,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.CLICK, 
 																						commandId=commandId)
@@ -4306,8 +4227,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.DOUBLE_CLICK, 
 																						commandId=commandId)
@@ -4326,8 +4246,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.MOUSE_DOWN, 
 																						commandId=commandId)
@@ -4346,8 +4265,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.MOUSE_UP, 
 																						commandId=commandId)
@@ -4366,8 +4284,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.IMPLICIT_WAIT, 
 																						commandId=commandId)
@@ -4385,8 +4302,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.DISMISS_ALERT, 
 																						commandId=commandId)
@@ -4404,8 +4320,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.ACCEPT_ALERT, 
 																						commandId=commandId)
@@ -4423,8 +4338,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		valueLayer = TestTemplates.TemplateLayer(name="")
 		if expectedText is not None:
@@ -4445,8 +4359,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.SET_ALERT_CREDENTIALS, 
 																						commandId=commandId)
@@ -4464,8 +4377,7 @@ class Selenium(TestAdapter.Adapter):
 		@return: an event matching with the template or none otherwise
 		@rtype: templatemessage
 		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapter.ValueException(TestAdapter.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+		TestAdapterLib.check_timeout(caller=TestAdapterLib.caller(), timeout=timeout)
 		
 		return self.isActionAccepted(timeout=timeout, commandName=Command.EXECUTE_SCRIPT, 
 																						commandId=commandId)

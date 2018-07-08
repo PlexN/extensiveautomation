@@ -93,8 +93,10 @@ class Client(TestAdapterLib.Adapter):
 		@param shared: shared adapter (default=False)
 		@type shared:	boolean
 		"""
-		TestAdapterLib.Adapter.__init__(self, name = __NAME__, parent = parent, debug=debug, shared=shared, 
-																								realname=name, showEvts=verbose, showSentEvts=verbose, showRecvEvts=verbose	)
+		TestAdapterLib.Adapter.__init__(self, name = __NAME__, parent = parent, 
+																									debug=debug, shared=shared, 
+																									realname=name, showEvts=verbose, 
+																									showSentEvts=verbose, showRecvEvts=verbose	)
 		self.parent = parent
 		self.logEventSent = logEventSent
 		self.logEventReceived = logEventReceived
